@@ -13,37 +13,39 @@
 
 static unsigned char data[2048];	//queue heap
 
-struct Q
+template<unsigned int max_size>
+struct Qtpl
 {
-	unsigned char queue[80];
+	static const unsigned int size = max_size;
+	
+	unsigned char queue[size];
 	unsigned char queue_first;
 	unsigned char queue_last;
 	
-	void* operator new(size_t size, void* memory);
-	void operator delete(void* memory);
-	Q();
-	~Q();
+	void* operator new(size_t size, void* memory)
+	{
+		return memory;
+	}
+	
+	void operator delete(void* memory)
+	{
+	}
+
+	Qtpl():
+	queue_first(0),
+	queue_last(0)
+	{
+		memset(queue, 0, size);
+	}
+	
+	~Qtpl()
+	{
+	}
 };
 
-void* Q::operator new(size_t size, void* memory)
-{
-	return memory;
-}
 
-void Q::operator delete(void* memory)
-{
-}
-
-Q::Q():
-queue_first(0),
-queue_last(0)
-{
-	memset(queue, 0, 80);
-}
-
-Q::~Q()
-{
-}
+struct Q : Qtpl<80>
+{};
 
 
 Q* create_queue()
@@ -63,7 +65,7 @@ void enqueue_byte(Q* q, unsigned char b)
 	q->queue[q->queue_last] = b;
 	++q->queue_last;
 
-	if(q->queue_last >= 80)
+	if(q->queue_last >= Q::size)
 	{
 		on_out_of_memory();
 	}
