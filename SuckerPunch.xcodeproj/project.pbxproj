@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		83ABEEE51543DB66002DC754 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83ABEEE41543DB66002DC754 /* main.cpp */; };
 		83ABEEE71543DB66002DC754 /* SuckerPunch.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 83ABEEE61543DB66002DC754 /* SuckerPunch.1 */; };
+		83ABEEEF1543DE88002DC754 /* Queue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83ABEEEE1543DE88002DC754 /* Queue.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +29,9 @@
 		83ABEEE01543DB66002DC754 /* SuckerPunch */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SuckerPunch; sourceTree = BUILT_PRODUCTS_DIR; };
 		83ABEEE41543DB66002DC754 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		83ABEEE61543DB66002DC754 /* SuckerPunch.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = SuckerPunch.1; sourceTree = "<group>"; };
+		83ABEEED1543DDD5002DC754 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		83ABEEEE1543DE88002DC754 /* Queue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Queue.cpp; sourceTree = "<group>"; };
+		83ABEEF01543DE9A002DC754 /* Queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Queue.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +66,9 @@
 			children = (
 				83ABEEE41543DB66002DC754 /* main.cpp */,
 				83ABEEE61543DB66002DC754 /* SuckerPunch.1 */,
+				83ABEEED1543DDD5002DC754 /* README.md */,
+				83ABEEEE1543DE88002DC754 /* Queue.cpp */,
+				83ABEEF01543DE9A002DC754 /* Queue.h */,
 			);
 			path = SuckerPunch;
 			sourceTree = "<group>";
@@ -117,6 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83ABEEE51543DB66002DC754 /* main.cpp in Sources */,
+				83ABEEEF1543DE88002DC754 /* Queue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
