@@ -57,12 +57,13 @@ int main(int argc, const char * argv[])
 	{
 		stq[i] = create_queue();
 	}
-	stq[64] = create_queue();	//must fail
+	//stq[64] = create_queue();	//must fail
 	for(int i = 0; i < 64; ++i)
 	{
 		destroy_queue(stq[i]);
 	}
-	destroy_queue(stq[0]);	//must fail
+	//destroy_queue(stq[0]);	//must fail
+	//destroy_queue(stq[64]);	//must fail
 	
 	for(int i = 0; i < 64; i+=3)
 	{
