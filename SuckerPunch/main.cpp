@@ -28,7 +28,8 @@ int main(int argc, const char * argv[])
 	
 	destroy_queue(qtest);
 	
-	/*
+	printf("Test output!\n");
+
 	//final output
 	Q* q0 = create_queue();
 	enqueue_byte(q0, 0);
@@ -48,7 +49,6 @@ int main(int argc, const char * argv[])
 	printf("%d ", dequeue_byte(q1));
 	printf("%d\n", dequeue_byte(q1));
 	destroy_queue(q1);
-	*/
 	
     return 0;
 }
