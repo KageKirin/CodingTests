@@ -83,6 +83,31 @@ static bool queued_byte_is_valid(queued_byte* qb)
 
 
 
+static byteType getNextFreeQID()
+{
+	static byteType count = 0;
+	byteType rv = count;
+	++count;
+	bool changed = true;
+	while(changed)
+	{
+		for(Q* q = &queue_ids[0]; queue_is_valid(q); ++q)
+		{
+			if(*q == rv)
+			{
+				rv = count;
+				++count;
+				changed = true;
+			}
+			else
+			{
+				changed = false;
+			}	
+		}
+	}
+	return rv;
+}
+
 static Q* getFirstAvailableQ()
 {
 	Q* firstUninitQ = &queue_ids[0];
@@ -98,9 +123,10 @@ Q* create_queue()
 {
 	initialize_data();
 	Q* q = getFirstAvailableQ();
+
+	*q = getNextFreeQID();
 	
-	static byteType count = 0;
-	*q = count++;
+	printf("created new Q [0x%p] with id: %i \n", q, *q);
 	return q;
 }
 
