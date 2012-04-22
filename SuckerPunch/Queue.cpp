@@ -152,6 +152,8 @@ static void destroyQueuedBytes(Q* q)
 void destroy_queue(Q* q)
 {
 	printf("destroying Q [0x%p] with id: %i \n", q, *q);
+	assert_illegal_op(q != NULL);
+	assert_illegal_op(*q != BAD_VALUE);
 	assert_illegal_op(queue_is_valid(q));
 	destroyQueuedBytes(q);
 	*q = BAD_VALUE;
