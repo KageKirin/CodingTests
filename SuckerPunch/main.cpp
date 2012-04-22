@@ -50,6 +50,31 @@ int main(int argc, const char * argv[])
 	printf("%d\n", dequeue_byte(q1));
 	destroy_queue(q1);
 	
+	//Stress testing
+	printf("Stress test!\n");
+	Q* stq[65];
+	for(int i = 0; i < 64; ++i)
+	{
+		stq[i] = create_queue();
+	}
+	stq[64] = create_queue();	//must fail
+	for(int i = 0; i < 64; ++i)
+	{
+		destroy_queue(stq[i]);
+	}
+	destroy_queue(stq[0]);	//must fail
+	
+	for(int i = 0; i < 64; i+=3)
+	{
+		stq[i+0] = create_queue();
+		stq[i+1] = create_queue();
+		stq[i+2] = create_queue();	//we will run out of queues at one point
+	
+		destroy_queue(stq[i+2]);
+		destroy_queue(stq[i+0]);
+	}
+
+	
     return 0;
 }
 
