@@ -10,6 +10,10 @@
 
 static unsigned char data[2048];	//queue heap
 
+struct Q
+{
+};
+
 Q* create_queue()
 {
 }

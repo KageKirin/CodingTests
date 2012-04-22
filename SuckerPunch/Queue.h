@@ -9,7 +9,7 @@
 #ifndef SuckerPunch_Queue_h
 #define SuckerPunch_Queue_h
 
-
+struct Q;
 
 Q* create_queue();			//Creates a FIFO byte queue, returning a handle to it.
 void destroy_queue(Q* q);	//Destroy an earlier created byte queue.
