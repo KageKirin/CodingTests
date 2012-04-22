@@ -59,11 +59,11 @@ static bool queue_is_valid(Q* q)
 {
 	Q* qstart = &queue_ids[0];
 	
-	printf("q[0x%p] - qstart[0x%p] = %i < %i ? %i \n",
-		q, qstart,
-		int(q - qstart),
-		max_queue_count,
-	   (int(q - qstart) < max_queue_count));
+	//	printf("q[0x%p] - qstart[0x%p] = %i < %i ? %i \n",
+	//	q, qstart,
+	//	int(q - qstart),
+	//	max_queue_count,
+	//	(int(q - qstart) < max_queue_count));
 	
 	return int(q - qstart) < max_queue_count; 
 }
@@ -135,7 +135,7 @@ Q* create_queue()
 
 	*q = getNextFreeQID();
 	
-	printf("created new Q [0x%p] with id: %i \n", q, *q);
+	//	printf("created new Q [0x%p] with id: %i \n", q, *q);
 	return q;
 }
 
@@ -153,7 +153,7 @@ static void destroyQueuedBytes(Q* q)
 
 void destroy_queue(Q* q)
 {
-	printf("destroying Q [0x%p] with id: %i \n", q, *q);
+	//	printf("destroying Q [0x%p] with id: %i \n", q, *q);
 	assert_illegal_op(q != NULL);
 	assert_illegal_op(*q != BAD_VALUE);
 	assert_illegal_op(queue_is_valid(q));
