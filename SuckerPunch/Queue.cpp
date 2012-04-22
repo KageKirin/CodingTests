@@ -116,14 +116,16 @@ static byteType getNextFreeQID()
 }
 
 static Q* getFirstAvailableQ()
-{
-	Q* firstUninitQ = &queue_ids[0];
-	while(*firstUninitQ != BAD_VALUE)
+{	
+	for(Q* firstUninitQ = &queue_ids[0];
+		queue_is_valid(firstUninitQ);
+		++firstUninitQ)
 	{
-		assert_out_of_memory(queue_is_valid(firstUninitQ));	//out of queues
-		++firstUninitQ;
+		if(*firstUninitQ == BAD_VALUE)
+			return firstUninitQ;
 	}
-	return firstUninitQ;
+	assert_out_of_memory(false);	//out of queues
+	return NULL;
 }
 
 Q* create_queue()
