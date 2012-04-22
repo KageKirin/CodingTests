@@ -276,14 +276,14 @@ void on_out_of_memory()
 {
 	printf("out of memory\n");
 	while(true)
-	{}
+	{;}
 }
 
 void on_illegal_operation()
 {
 	printf("illegal operation\n");
 	while(true)
-	{}
+	{;}
 }
 
 
