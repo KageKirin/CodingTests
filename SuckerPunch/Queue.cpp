@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Christian Helmich. All rights reserved.
 //
 
+#include "stdafx.h"
 #include <cstdio>
 #include <cstring>
 #include "Queue.h"
