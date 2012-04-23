@@ -11,35 +11,7 @@
 #include <cstring>
 #include "Queue.h"
 
-
-struct queued_byte
-{
-	Q queueID;
-	byteType value;
-};
-
 static const byteType BAD_VALUE = 0xFF;
-
-static const unsigned int data_size = 2048;
-static byteType data[data_size];	//queue heap
-
-static const unsigned int max_queue_count = 64;
-static Q* queue_ids = &data[0];	//we use the memory area [0..63], first 64 bytes
-
-static const unsigned int remaining_space = data_size - max_queue_count;
-static const unsigned int max_queued_byte_count = remaining_space / sizeof(queued_byte);
-static queued_byte* queued_bytes = (queued_byte*)&data[max_queue_count];	//we use the remaining data for storing the data
-
-static void initializeData()
-{
-	static bool once = false;
-	if(once)
-		return;
-	
-	memset(data, BAD_VALUE, data_size);
-	once = true;
-}
-
 
 //assert
 static void assertIllegalOp(bool cond)
@@ -55,83 +27,121 @@ static void assertOutOfMemory(bool cond)
 }
 
 
-//conditions
-static bool queueInValidRange(Q* q)
+template<unsigned int _size, typename T>
+struct queue_structure
 {
-	Q* qstart = &queue_ids[0];
-	
-	//	printf("q[0x%p] - qstart[0x%p] = %i < %i ? %i \n",
-	//	q, qstart,
-	//	int(q - qstart),
-	//	max_queue_count,
-	//	(int(q - qstart) < max_queue_count));
-	
-	return int(q - qstart) < max_queue_count; 
-}
+	typedef T value_type;
+	static const unsigned int data_size = 2048;
+	byteType data[data_size];	//queue heap
 
+	static const unsigned int max_queue_count = 64;
+	Q* queue_ids;	//we use the memory area [0..63], first 64 bytes
 
-static bool queuesAreInitialized()
-{
+	struct queued_byte
+	{
+		Q queueID;
+		value_type value;
+	};
+	
+	static const unsigned int remaining_space = data_size - max_queue_count;
+	static const unsigned int max_queued_byte_count = remaining_space / sizeof(queued_byte);
+	queued_byte* queued_bytes;	//we use the remaining data for storing the data
+	
+	queue_structure():
+	queue_ids( &data[0] ),
+	queued_bytes( (queued_byte*)&data[max_queue_count] )
+	{
+		memset(data, BAD_VALUE, data_size);
+	}
+	
+	
+	//conditions
+	bool queueInValidRange(Q* q)
+	{
+		Q* qstart = &queue_ids[0];
+	
+		//	printf("q[0x%p] - qstart[0x%p] = %i < %i ? %i \n",
+		//	q, qstart,
+		//	int(q - qstart),
+		//	max_queue_count,
+		//	(int(q - qstart) < max_queue_count));
+	
+		return int(q - qstart) < max_queue_count; 
+	}
+	
+	
+	bool queuesAreInitialized()
+	{
 	for(Q* q = &queue_ids[0];
 		queueInValidRange(q);
 		++q)
-	{
+		{
 		if(*q != BAD_VALUE)
 			return true;
-	}
+		}
 	return false;
-}
-
-
-static bool queuedByteInValidRange(queued_byte* qb)
-{
+	}
+	
+	
+	bool queuedByteInValidRange(queued_byte* qb)
+	{
 	queued_byte* qbstart = &queued_bytes[0];	
 	return int(qb - qbstart) < max_queued_byte_count; 
-}
-
-
-
-static byteType getNextFreeQID()
-{
+	}
+	
+	
+	
+	byteType getNextFreeQID()
+	{
 	static byteType count = 0;
 	byteType rv = count;
 	++count;
 	bool changed = true;
 	while(changed)
-	{
-		for(Q* q = &queue_ids[0]; queueInValidRange(q); ++q)
 		{
-			if(*q == rv)
+		for(Q* q = &queue_ids[0]; queueInValidRange(q); ++q)
 			{
+			if(*q == rv)
+				{
 				rv = count;
 				++count;
 				changed = true;
-			}
+				}
 			else
-			{
+				{
 				changed = false;
-			}	
+				}	
+			}
 		}
-	}
 	return rv;
+	}
+	
+	Q* getFirstAvailableQ()
+	{	
+		for(Q* firstUninitQ = &queue_ids[0];
+			queueInValidRange(firstUninitQ);
+			++firstUninitQ)
+			{
+			if(*firstUninitQ == BAD_VALUE)
+				return firstUninitQ;
+			}
+		assertOutOfMemory(false);	//out of queues
+		return NULL;
+	}
+
+};
+
+
+template <unsigned int _size, typename T>
+static queue_structure<_size, T>* getQueueStruct()
+{
+	static queue_structure<_size, T> queue_struct;
+	return queue_struct;
 }
 
-static Q* getFirstAvailableQ()
-{	
-	for(Q* firstUninitQ = &queue_ids[0];
-		queueInValidRange(firstUninitQ);
-		++firstUninitQ)
-	{
-		if(*firstUninitQ == BAD_VALUE)
-			return firstUninitQ;
-	}
-	assertOutOfMemory(false);	//out of queues
-	return NULL;
-}
 
 Q* create_queue()
-{
-	initializeData();
+{	
 	Q* q = getFirstAvailableQ();
 
 	*q = getNextFreeQID();
