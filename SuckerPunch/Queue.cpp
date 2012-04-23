@@ -30,7 +30,7 @@ static const unsigned int remaining_space = data_size - max_queue_count;
 static const unsigned int max_queued_byte_count = remaining_space / sizeof(queued_byte);
 static queued_byte* queued_bytes = (queued_byte*)&data[max_queue_count];	//we use the remaining data for storing the data
 
-static void initialize_data()
+static void initializeData()
 {
 	static bool once = false;
 	if(once)
@@ -42,13 +42,13 @@ static void initialize_data()
 
 
 //assert
-static void assert_illegal_op(bool cond)
+static void assertIllegalOp(bool cond)
 {
 	if(!cond)
 		on_illegal_operation();
 }
 
-static void assert_out_of_memory(bool cond)
+static void assertOutOfMemory(bool cond)
 {
 	if(!cond)
 		on_out_of_memory();
@@ -56,7 +56,7 @@ static void assert_out_of_memory(bool cond)
 
 
 //conditions
-static bool queue_is_valid(Q* q)
+static bool queueInValidRange(Q* q)
 {
 	Q* qstart = &queue_ids[0];
 	
@@ -70,10 +70,10 @@ static bool queue_is_valid(Q* q)
 }
 
 
-static bool queues_are_initialized()
+static bool queuesAreInitialized()
 {
 	for(Q* q = &queue_ids[0];
-		queue_is_valid(q);
+		queueInValidRange(q);
 		++q)
 	{
 		if(*q != BAD_VALUE)
@@ -83,7 +83,7 @@ static bool queues_are_initialized()
 }
 
 
-static bool queued_byte_is_valid(queued_byte* qb)
+static bool queuedByteInValidRange(queued_byte* qb)
 {
 	queued_byte* qbstart = &queued_bytes[0];	
 	return int(qb - qbstart) < max_queued_byte_count; 
@@ -99,7 +99,7 @@ static byteType getNextFreeQID()
 	bool changed = true;
 	while(changed)
 	{
-		for(Q* q = &queue_ids[0]; queue_is_valid(q); ++q)
+		for(Q* q = &queue_ids[0]; queueInValidRange(q); ++q)
 		{
 			if(*q == rv)
 			{
@@ -119,19 +119,19 @@ static byteType getNextFreeQID()
 static Q* getFirstAvailableQ()
 {	
 	for(Q* firstUninitQ = &queue_ids[0];
-		queue_is_valid(firstUninitQ);
+		queueInValidRange(firstUninitQ);
 		++firstUninitQ)
 	{
 		if(*firstUninitQ == BAD_VALUE)
 			return firstUninitQ;
 	}
-	assert_out_of_memory(false);	//out of queues
+	assertOutOfMemory(false);	//out of queues
 	return NULL;
 }
 
 Q* create_queue()
 {
-	initialize_data();
+	initializeData();
 	Q* q = getFirstAvailableQ();
 
 	*q = getNextFreeQID();
@@ -144,7 +144,7 @@ Q* create_queue()
 static void destroyQueuedBytes(Q* q)
 {
 	for(queued_byte* qb = &queued_bytes[0];
-		queued_byte_is_valid(qb);
+		queuedByteInValidRange(qb);
 		++qb)
 	{
 		if(qb->queueID == *q)
@@ -155,9 +155,9 @@ static void destroyQueuedBytes(Q* q)
 void destroy_queue(Q* q)
 {
 	//	printf("destroying Q [0x%p] with id: %i \n", q, *q);
-	assert_illegal_op(q != NULL);
-	assert_illegal_op(*q != BAD_VALUE);
-	assert_illegal_op(queue_is_valid(q));
+	assertIllegalOp(q != NULL);
+	assertIllegalOp(*q != BAD_VALUE);
+	assertIllegalOp(queueInValidRange(q));
 	destroyQueuedBytes(q);
 	*q = BAD_VALUE;
 }
@@ -168,7 +168,7 @@ static queued_byte* getFirstAvailableQueuedByte()
 	queued_byte* firstUninitQB = &queued_bytes[0];
 	while(firstUninitQB->queueID != BAD_VALUE)
 	{
-		assert_out_of_memory(queued_byte_is_valid(firstUninitQB));	//out of memory
+		assertOutOfMemory(queuedByteInValidRange(firstUninitQB));	//out of memory
 		++firstUninitQB;
 	}
 	return firstUninitQB;	
@@ -180,7 +180,7 @@ static queued_byte* getNextHole(queued_byte* qbstart)
 	queued_byte* qb = qbstart;
 	while(qb->queueID != BAD_VALUE)
 	{
-		if(!queued_byte_is_valid(qb))
+		if(!queuedByteInValidRange(qb))
 			return NULL;
 		++qb;
 	}
@@ -192,22 +192,22 @@ static queued_byte* getNextValid(queued_byte* qbstart)
 	queued_byte* qb = qbstart;
 	while(qb->queueID == BAD_VALUE)
 	{
-		if(!queued_byte_is_valid(qb))
+		if(!queuedByteInValidRange(qb))
 			return NULL;
 		++qb;
 	}
-	if(!queued_byte_is_valid(qb))
+	if(!queuedByteInValidRange(qb))
 		return NULL;
 	return qb;
 }
 
 static void swapQueuedBytes(queued_byte* a, queued_byte* b)
 {
-	assert_illegal_op(a != NULL);
-	assert_illegal_op(b != NULL);
+	assertIllegalOp(a != NULL);
+	assertIllegalOp(b != NULL);
 	
-	assert_illegal_op(queued_byte_is_valid(a));
-	assert_illegal_op(queued_byte_is_valid(b));
+	assertIllegalOp(queuedByteInValidRange(a));
+	assertIllegalOp(queuedByteInValidRange(b));
 
 	memcpy(a, b, sizeof(queued_byte));
 	memset(b, BAD_VALUE, sizeof(queued_byte));
@@ -233,9 +233,9 @@ static void fillUpHolesInQueuedBytes()
 
 void enqueue_byte(Q* q, unsigned char b)
 {
-	assert_illegal_op(queues_are_initialized());
-	assert_illegal_op(q != NULL);
-	assert_illegal_op(queue_is_valid(q));
+	assertIllegalOp(queuesAreInitialized());
+	assertIllegalOp(q != NULL);
+	assertIllegalOp(queueInValidRange(q));
 
 	//here we need eventually to memmov_left the queued_bytes to avoid holes
 	fillUpHolesInQueuedBytes();
@@ -250,14 +250,14 @@ void enqueue_byte(Q* q, unsigned char b)
 
 static queued_byte* getFirstQueuedByteForQ(Q* q)
 {
-	assert_illegal_op(queues_are_initialized());
-	assert_illegal_op(q != NULL);
-	assert_illegal_op(queue_is_valid(q));
+	assertIllegalOp(queuesAreInitialized());
+	assertIllegalOp(q != NULL);
+	assertIllegalOp(queueInValidRange(q));
 
 	queued_byte* firstQB = &queued_bytes[0];
 	while(firstQB->queueID != *q)
 	{
-		assert_illegal_op(queued_byte_is_valid(firstQB));
+		assertIllegalOp(queuedByteInValidRange(firstQB));
 		++firstQB;
 	}
 	return firstQB;	
