@@ -10,3 +10,10 @@
 *.lai
 *.la
 *.a
+
+# MSVC temp files
+Debug/
+*/Debug/
+*.ncb
+*.suo
+*.user
