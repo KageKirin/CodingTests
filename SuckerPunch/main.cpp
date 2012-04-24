@@ -52,6 +52,7 @@ int main(int argc, const char * argv[])
 	destroy_queue(q1);
 	
 	//Stress testing
+	/*
 	printf("Creation/desctruction stress test!\n");
 	Q* stq[65];
 	for(int i = 0; i < 64; ++i)
@@ -76,6 +77,7 @@ int main(int argc, const char * argv[])
 		destroy_queue(stq[i+1]);
 		destroy_queue(stq[i+0]);	//will run out of queues at 62 if this line is commented out
 	}
+	*/
 	
 	printf("Queue filling stress test!\n");
 	Q* fillQ[15];
@@ -88,7 +90,7 @@ int main(int argc, const char * argv[])
 	{
 		for(int i = 0; i < 15; ++i)
 		{
-			for(int b = 0; b < 10; ++b)
+			for(int b = 0; b < 5; ++b)
 			{
 				enqueue_byte(fillQ[i], (unsigned char)((a*i + b)%256));
 			}
@@ -97,9 +99,9 @@ int main(int argc, const char * argv[])
 	
 	for(int i = 0; i < 15; ++i)
 	{
-		for(int c = 0; c < 80; ++c)
+		for(int c = 0; c < 40; ++c)
 		{
-			printf("q(%i): %i", i, dequeue_byte(fillQ[i]));
+			printf("q(%i): %i;\t", i, dequeue_byte(fillQ[i]));
 		}
 		printf("\n");
 		destroy_queue(fillQ[i]);
