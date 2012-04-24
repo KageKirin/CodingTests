@@ -88,16 +88,16 @@ int main(int argc, const char * argv[])
 	{
 		for(int i = 0; i < 15; ++i)
 		{
-			for(int b = 0; b < 10; ++b)
+			for(int b = 0; b < 5; ++b)	//10 -> oom
 			{
-				enqueue_byte(fillQ[i], (unsigned char)((a*i + b)%256));
+				enqueue_byte(fillQ[i], (unsigned char)((a*i + b)%256));	//will run out of memory at one point
 			}
 		}
 	}
 	
 	for(int i = 0; i < 15; ++i)
 	{
-		for(int c = 0; c < 80; ++c)
+		for(int c = 0; c < 40; ++c)
 		{
 			printf("q(%i): %i", i, dequeue_byte(fillQ[i]));
 		}

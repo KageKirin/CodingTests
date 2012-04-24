@@ -86,7 +86,7 @@ private:
 	bool queuesAreInitialized()
 	{
 		for(Q* q = getStartQ();
-			getEndQ();
+			q != getEndQ();
 			++q)
 		{
 			if(*q != BAD_VALUE)
@@ -123,7 +123,7 @@ private:
 	Q* getFirstAvailableQ()
 	{	
 		for(Q* firstUninitQ = getStartQ();
-			queueInValidRange(firstUninitQ);
+			firstUninitQ != getEndQ();
 			++firstUninitQ)
 		{
 			if(*firstUninitQ == BAD_VALUE)
@@ -137,7 +137,7 @@ private:
 	void destroyQueuedValues(Q* q)
 	{
 		for(queued_value* qb = getStartQueuedValue();
-			getEndQueuedValue();
+			qb != getEndQueuedValue();
 			++qb)
 		{
 			if(qb->queueID == *q)
