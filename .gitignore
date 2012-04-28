@@ -23,3 +23,9 @@ Debug/
 *.ncb
 *.suo
 *.user
+
+# Deliverables
+*.zip
+*.rar
+*.7z
+
