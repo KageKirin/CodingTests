@@ -11,47 +11,108 @@
 #include <cstring>
 #include "Queue.h"
 
-//pair to keep a reference of the queue with the enqueued value
+
+typedef unsigned char	byteType;
+typedef unsigned short	uShort;
+
 struct queued_byte
 {
-	Q queueID;
 	byteType value;
+	
+	static queued_byte*const begin();
+	static queued_byte*const end();
+	static queued_byte*const at(unsigned int idx);
+	
+	static bool in_valid_range(queued_byte* qb);
+	static bool in_valid_range(unsigned int idx);
+	
+	void invalidate();
 };
 
-//tag for uninitialized queues and data
-static const byteType BAD_VALUE = 0xFF;
 
+class Q
+{
+public:
+	uShort start_offset;	//can exceed 255
+	uShort length;			//can exceed 255
+
+public:
+	//API replication
+	static Q* create();
+	static void destroy(Q* q);
+
+	void enqueue_byte(byteType b);
+	byteType dequeue_byte();
+	
+	//queued bytes iterating
+	queued_byte*const queued_bytes_begin();
+	queued_byte*const queued_bytes_end();
+	queued_byte*const queued_byte_at(unsigned int idx);
+	
+	//Q iterating
+	static Q*const begin();
+	static Q*const end();	
+	static uShort get_start_offset(Q* q);
+	
+	//conditions to check for data validity
+	static bool at_least_one_exists();
+	bool in_valid_range();
+	bool is_valid();
+	bool length_is_valid();
+	bool offset_is_valid();
+	
+protected:
+	void destroy_queued_bytes();
+	void move_queued_bytes(queued_byte*const targetBuffer);
+	void shift_left_queued_bytes();
+};
+
+
+//min/max. not using std for it
+template<typename T>
+T min(T a, T b)
+{
+	return a < b ? a : b;
+}
+
+template<typename T>
+T max(T a, T b)
+{
+	return a > b ? a : b;
+}
+
+//tag for uninitialized queues and data
+static const byteType	BAD_VALUE = 0xFF;
+static const uShort		BAD_QUEUE = 0xFFFF;
 
 //overall available data
 static const unsigned int data_size = 2048;
 static byteType data[data_size];	//queue heap
+									//data needs to be initialized once to BAD_DATA
+static void initializeData()
+{
+	static bool once = false;
+	if(once)
+		return;
+	
+	memset(data, BAD_VALUE, data_size);
+	once = true;
+}
+
 
 //array alias for queues
 static const unsigned int max_queue_count = 64;
-static Q*const queue_ids = &data[0];	//we use the memory area [0..63], first 64 bytes
-static Q*const Q_begin()
-{
-	return &queue_ids[0];
-}
+static const unsigned int max_queue_info_byteSize = max_queue_count * sizeof(Q);
+static byteType current_queue_max_length = 80;
+static Q*const queue_ids = (Q*)&data[0];	//we use the memory area [0..63], first 64 bytes
 
-static Q*const Q_end()
-{
-	return &queue_ids[max_queue_count];
-}
 
 //array alias for queued bytes
-static const unsigned int remaining_space = data_size - max_queue_count;
+static const unsigned int remaining_space = data_size - max_queue_info_byteSize;
 static const unsigned int max_queued_byte_count = remaining_space / sizeof(queued_byte);
 static queued_byte*const queued_bytes = (queued_byte*)&data[max_queue_count];	//we use the remaining data for storing the data
-static queued_byte*const queued_bytes_begin()
-{
-	return &queued_bytes[0];
-}
 
-static queued_byte*const queued_bytes_end()
-{
-	return &queued_bytes[max_queued_byte_count];
-}
+
 
 
 //assert functions
@@ -69,210 +130,266 @@ static void assert_OutOfMemory(bool cond)
 
 
 
-//data needs to be initialized once to BAD_DATA
-static void initializeData()
-{
-	static bool once = false;
-	if(once)
-		return;
-	
-	memset(data, BAD_VALUE, data_size);
-	once = true;
-}
 
-
-//conditions to check for data validity
-static bool Q_is_in_valid_range(Q* q)
+// Q::functions implementation
+Q* Q::create()
 {
-	Q* qstart = Q_begin();
-	return int(q - qstart) < max_queue_count; 
-}
-
-static bool Q_at_least_one_exists()
-{
-	for(Q* q = Q_begin(); q != Q_end(); ++q)
+	for(Q* q_1st_free = Q::begin(); q_1st_free != Q::end(); ++q_1st_free)
 	{
-		if(*q != BAD_VALUE)
-			return true;
-	}
-	return false;
-}
-
-static bool queued_byte_is_in_valid_range(queued_byte* qb)
-{
-	queued_byte* qbstart = queued_bytes_begin();	
-	return int(qb - qbstart) < max_queued_byte_count; 
-}
-
-
-//helper functions
-static byteType Q_get_next_free_id()
-{
-	//avoid any possible ID conflict when creating and destroying lots of(>254) queues
-	static byteType count = 0;
-	byteType rv = count;
-	count = (count + 1) % 255;	//0xFF is invalid
-	bool changed = true;
-	while(changed)
-	{
-		for(Q* q = Q_begin(); q != Q_end(); ++q)
-		{
-			if(*q == rv)
-			{
-				rv = count;
-				count = (count + 1) % 255;
-				changed = true;
-			}
-			else
-			{
-				changed = false;
-			}	
-		}
-	}
-	return rv;
-}
-
-static Q* Q_get_first_available()
-{	
-	for(Q* q_1st_free = Q_begin(); q_1st_free != Q_end(); ++q_1st_free)
-	{
-		if(*q_1st_free == BAD_VALUE)
+		if(q_1st_free->start_offset == BAD_QUEUE)
 			return q_1st_free;
 	}
 	assert_OutOfMemory(false);	//out of queues
 	return NULL;
 }
 
-Q* create_queue()
+void Q::destroy(Q *q)
 {
-	initializeData();
-	Q* q = Q_get_first_available();
-	assert_IllegalOp(q != NULL);	
-	assert_IllegalOp(Q_is_in_valid_range(q));
-	*q = Q_get_next_free_id();
-	assert_IllegalOp(*q != BAD_VALUE);
-	return q;
-}
-
-
-static void destroy_queued_bytes(Q* q)
-{
-	for(queued_byte* qb = queued_bytes_begin(); qb != queued_bytes_end(); ++qb)
-	{
-		if(qb->queueID == *q)
-			memset(qb, BAD_VALUE, sizeof(queued_byte));
-	}
-}
-
-void destroy_queue(Q* q)
-{
-	//	printf("destroying Q [0x%p] with id: %i \n", q, *q);
 	assert_IllegalOp(q != NULL);
-	assert_IllegalOp(*q != BAD_VALUE);
-	assert_IllegalOp(q != Q_end());
-	destroy_queued_bytes(q);
-	*q = BAD_VALUE;
+	assert_IllegalOp(q->in_valid_range());
+	assert_IllegalOp(q->is_valid());
+	
+	q->destroy_queued_bytes();
+	
+	q->start_offset = BAD_QUEUE;
+	q->length = BAD_QUEUE;
+}
+
+Q*const Q::begin()
+{
+	return &queue_ids[0];
+}
+
+Q*const Q::end()
+{
+	return &queue_ids[max_queue_count];
 }
 
 
-static queued_byte* queued_byte_get_next_free(queued_byte* qbstart)
+queued_byte*const Q::queued_bytes_begin()
 {
-	for(queued_byte* qb = qbstart; qb != queued_bytes_end(); ++qb)
-	{		
-		if(qb->queueID == BAD_VALUE)
-			return qb;		
-	}
-	return NULL;	
+	return &queued_bytes[start_offset];	
 }
 
-static queued_byte* queued_byte_get_next_valid(queued_byte* qbstart)
+queued_byte*const Q::queued_bytes_end()
 {
-	for(queued_byte* qb = qbstart; qb != queued_bytes_end(); ++qb)	
+	return &queued_bytes[start_offset + length];	
+}
+
+
+bool Q::in_valid_range()
+{
+	Q* qstart = Q::begin();
+	return int(this - qstart) < max_queue_info_byteSize; 
+}
+
+bool Q::at_least_one_exists()
+{
+	for(Q* q = Q::begin(); q != Q::end(); ++q)
 	{
-		if(qb->queueID != BAD_VALUE)
-			return qb;
+		if(q->start_offset != BAD_VALUE)
+			return true;
 	}
-	return NULL;
+	return false;
 }
 
-static queued_byte* queued_byte_get_first_available()
+uShort Q::get_start_offset(Q* q)
 {
-	queued_byte* qb_1st_free = queued_byte_get_next_free(queued_bytes_begin());
-	assert_OutOfMemory(qb_1st_free != NULL);	//out of memory
-	return qb_1st_free;
+	unsigned int qIdx = (q - Q::begin());
+	//qIdx /= sizeof(Q);
+	return qIdx * current_queue_max_length;
 }
+
+void Q::destroy_queued_bytes()
+{
+	assert_IllegalOp(length_is_valid());
+	
+	for(queued_byte* qb = queued_bytes_begin();
+		qb != queued_bytes_end();
+		++qb)
+	{
+		qb->value = BAD_VALUE;
+	}
+}
+
+void Q::enqueue_byte(byteType b)
+{
+	//	bound_check();
+	
+	queued_byte* qb = queued_bytes_begin() + length;
+	qb->value = b;
+	++length;
+}
+
+byteType Q::dequeue_byte()
+{
+	queued_byte* qb = queued_bytes_begin();
+	byteType b = qb->value;
+	
+	shift_left_queued_bytes();
+	--length;
+	
+	return b;
+}
+
+bool Q::is_valid()
+{
+	return length_is_valid() && offset_is_valid();
+}
+
+bool Q::length_is_valid()
+{
+	return length != BAD_QUEUE;
+}
+
+bool Q::offset_is_valid()
+{
+	return start_offset != BAD_QUEUE;
+}
+
+
+void Q::move_queued_bytes(queued_byte*const targetBuffer)
+{
+	static unsigned int tempBufferSize = 20;
+	queued_byte buffer[tempBufferSize];
+	
+	for(int i = 0; i < length; i += tempBufferSize)
+	{
+		unsigned int copySize = min(tempBufferSize, (unsigned int)(length - i));
+		queued_byte* origin = queued_bytes_begin() + i;
+		
+		memcpy(buffer, origin, copySize);
+		memcpy(targetBuffer + i, buffer, copySize);
+		memset(origin, BAD_VALUE, copySize);
+	}
+}
+
+
+void Q::shift_left_queued_bytes()
+{
+	queued_byte* qb_target = queued_bytes_begin();
+	for(queued_byte* qb = qb_target + 1;
+		qb != queued_bytes_end();
+		++qb)
+	{
+		memcpy(qb_target, qb, sizeof(queued_byte));
+		
+		qb->invalidate();
+		++qb_target;	
+	}
+}
+
+//
+
+
+static void Q_bonds_check()
+{
+}
+
+
+static void Q_size_adjust()
+{
+}
+
+
+
+
 
 static void queued_byte_swap(queued_byte* a, queued_byte* b)
 {
 	assert_IllegalOp(a != NULL);
 	assert_IllegalOp(b != NULL);
 	
-	assert_IllegalOp(queued_byte_is_in_valid_range(a));
-	assert_IllegalOp(queued_byte_is_in_valid_range(b));
-
+	assert_IllegalOp(queued_byte::in_valid_range(a));
+	assert_IllegalOp(queued_byte::in_valid_range(b));
+	
 	memcpy(a, b, sizeof(queued_byte));
 	memset(b, BAD_VALUE, sizeof(queued_byte));
 }
 
-static void queued_byte_fill_holes()
+
+
+
+
+
+//queued_byte::functions implementation
+queued_byte*const queued_byte::begin()
 {
-	queued_byte* qbHoleSearchStart = queued_bytes_begin();
-	queued_byte* qbFirstHole = queued_byte_get_next_free(qbHoleSearchStart);
-	while(qbFirstHole != NULL)	//NULL -> no holes, nothing to do
-	{
-	//		if(qbFirstHole != qbHoleSearchStart)
-	
-		queued_byte* qbNextValid = queued_byte_get_next_valid(qbFirstHole + 1);
-		if(qbNextValid == NULL)
-			break; //no more valids, nothing to swap
-	
-		queued_byte_swap(qbFirstHole, qbNextValid);
-		qbHoleSearchStart = qbFirstHole +1;
-		qbFirstHole = queued_byte_get_next_free(qbHoleSearchStart);
-	}
+	return &queued_bytes[0];
 }
+
+queued_byte*const queued_byte::end()
+{
+	return &queued_bytes[max_queued_byte_count];
+}
+
+queued_byte*const queued_byte::at(unsigned int idx)
+{
+	assert_IllegalOp(queued_byte::in_valid_range(idx));
+	if(queued_byte::in_valid_range(idx))
+		return &queued_bytes[idx];
+	return NULL;
+}
+
+bool queued_byte::in_valid_range(queued_byte* qb)
+{
+	queued_byte* qbstart = queued_byte::begin();	
+	return int(qb - qbstart) < max_queued_byte_count; 
+}
+
+bool queued_byte::in_valid_range(unsigned int idx)
+{
+	return idx < max_queued_byte_count; 
+}
+
+void queued_byte::invalidate()
+{
+	memset(this, BAD_VALUE, sizeof(queued_byte));
+}
+
+
+
+// "API" implementation
+
+Q* create_queue()
+{
+	initializeData();
+	Q* q = Q::create();
+	assert_IllegalOp(q != NULL);	
+	assert_IllegalOp(q->in_valid_range());
+	
+	Q_bonds_check();
+	Q_size_adjust();	//check if q count > 24, if so adjust queue max size to less
+	
+	q->start_offset = Q::get_start_offset(q);
+	q->length = 0;
+	
+	return q;
+}
+
+
+void destroy_queue(Q* q)
+{
+	//	printf("destroying Q [0x%p] with id: %i \n", q, *q);
+	Q::destroy(q);
+}
+
 
 void enqueue_byte(Q* q, unsigned char b)
 {
-	assert_IllegalOp(Q_at_least_one_exists());
 	assert_IllegalOp(q != NULL);
-	assert_IllegalOp(q != Q_end());
-
-	//here we need eventually to fill "holes", i.e. queued_bytes that have already been dequeued, thus would turn up as "free" and change the order of the queue if used
-	queued_byte_fill_holes();
+	assert_IllegalOp(q->is_valid());
 	
-	//once this is done, we can get the first available qb
-	queued_byte* qb = queued_byte_get_first_available();
-	
-	qb->queueID = *q;
-	qb->value = b;
+	q->enqueue_byte(b);
 }
 
-
-static queued_byte* queued_byte_get_first_for_Q(Q* q)
-{
-	assert_IllegalOp(Q_at_least_one_exists());
-	assert_IllegalOp(q != NULL);
-	assert_IllegalOp(q != Q_end());
-
-	queued_byte* qb;
-	for(qb = queued_bytes_begin(); qb != queued_bytes_end(); ++qb)
-	{
-		if(qb->queueID == *q)
-			return qb;		
-	}
-	assert_IllegalOp(queued_byte_is_in_valid_range(qb));
-	return NULL;	
-}
 
 unsigned char dequeue_byte(Q* q)
 {
-	queued_byte* qb = queued_byte_get_first_for_Q(q);
-	byteType b = qb->value;
-	
-	memset(qb, BAD_VALUE, sizeof(queued_byte));
-	
-	return b;
+	assert_IllegalOp(q != NULL);
+	assert_IllegalOp(q->is_valid());
+
+	return q->dequeue_byte();
 }
 
 
@@ -291,5 +408,104 @@ void on_illegal_operation()
 	{;}
 }
 
+
+
+/// scrape
+
+
+
+
+
+//helper functions
+/*
+ static byteType Q_get_next_free_id()
+ {
+ //avoid any possible ID conflict when creating and destroying lots of(>254) queues
+ static byteType count = 0;
+ byteType rv = count;
+ count = (count + 1) % 255;	//0xFF is invalid
+ bool changed = true;
+ while(changed)
+ {
+ for(Q* q = Q_begin(); q != Q_end(); ++q)
+ {
+ if(*q == rv)
+ {
+ rv = count;
+ count = (count + 1) % 255;
+ changed = true;
+ }
+ else
+ {
+ changed = false;
+ }	
+ }
+ }
+ return rv;
+ }
+ */
+
+/*
+ static queued_byte* queued_byte_get_next_free(queued_byte* qbstart)
+ {
+ for(queued_byte* qb = qbstart; qb != queued_bytes_end(); ++qb)
+ {		
+ if(qb->queueID == BAD_VALUE)
+ return qb;		
+ }
+ return NULL;	
+ }
+ 
+ static queued_byte* queued_byte_get_next_valid(queued_byte* qbstart)
+ {
+ for(queued_byte* qb = qbstart; qb != queued_bytes_end(); ++qb)	
+ {
+ if(qb->queueID != BAD_VALUE)
+ return qb;
+ }
+ return NULL;
+ }
+ 
+ static queued_byte* queued_byte_get_first_available()
+ {
+ queued_byte* qb_1st_free = queued_byte_get_next_free(queued_bytes_begin());
+ assert_OutOfMemory(qb_1st_free != NULL);	//out of memory
+ return qb_1st_free;
+ }
+ 
+ static void queued_byte_fill_holes()
+ {
+ queued_byte* qbHoleSearchStart = queued_bytes_begin();
+ queued_byte* qbFirstHole = queued_byte_get_next_free(qbHoleSearchStart);
+ while(qbFirstHole != NULL)	//NULL -> no holes, nothing to do
+ {
+ //		if(qbFirstHole != qbHoleSearchStart)
+ 
+ queued_byte* qbNextValid = queued_byte_get_next_valid(qbFirstHole + 1);
+ if(qbNextValid == NULL)
+ break; //no more valids, nothing to swap
+ 
+ queued_byte_swap(qbFirstHole, qbNextValid);
+ qbHoleSearchStart = qbFirstHole +1;
+ qbFirstHole = queued_byte_get_next_free(qbHoleSearchStart);
+ }
+ }
+ 
+ static queued_byte* queued_byte_get_first_for_Q(Q* q)
+ {
+ assert_IllegalOp(Q_at_least_one_exists());
+ assert_IllegalOp(q != NULL);
+ assert_IllegalOp(q != Q_end());
+ 
+ queued_byte* qb;
+ for(qb = queued_bytes_begin(); qb != queued_bytes_end(); ++qb)
+ {
+ if(qb->queueID == *q)
+ return qb;		
+ }
+ assert_IllegalOp(queued_byte_is_in_valid_range(qb));
+ return NULL;	
+ }
+ */
 
 
