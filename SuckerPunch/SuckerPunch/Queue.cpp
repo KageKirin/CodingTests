@@ -18,6 +18,7 @@ typedef unsigned short	uShort;
 struct queued_byte
 {
 	byteType value;
+	static uShort current_count;
 	
 	static queued_byte*const begin();
 	static queued_byte*const end();
@@ -25,10 +26,11 @@ struct queued_byte
 	
 	static bool in_valid_range(queued_byte* qb);
 	static bool in_valid_range(unsigned int idx);
+	static bool memory_available();
 	
 	void invalidate();
 };
-
+uShort queued_byte::current_count = 0;
 
 class Q
 {
@@ -219,6 +221,7 @@ void Q::enqueue_byte(byteType b)
 	queued_byte* qb = queued_bytes_begin() + length;
 	qb->value = b;
 	++length;
+	++queued_byte::current_count;
 }
 
 byteType Q::dequeue_byte()
@@ -229,6 +232,7 @@ byteType Q::dequeue_byte()
 	shift_left_queued_bytes();
 	--length;
 	
+	--queued_byte::current_count;
 	return b;
 }
 
@@ -340,6 +344,11 @@ bool queued_byte::in_valid_range(queued_byte* qb)
 bool queued_byte::in_valid_range(unsigned int idx)
 {
 	return idx < max_queued_byte_count; 
+}
+
+bool queued_byte::memory_available()
+{
+	return current_count < max_queued_byte_count;
 }
 
 void queued_byte::invalidate()
