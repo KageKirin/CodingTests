@@ -107,7 +107,8 @@ static void initializeData()
 //array alias for queues
 static const unsigned int max_queue_count = 64;
 static const unsigned int max_queue_info_byteSize = max_queue_count * sizeof(Q);
-static byteType current_queue_max_length = 80;
+static uShort current_queue_count = 0;
+static uShort current_queue_max_length = 80;
 static Q*const queue_ids = (Q*)&data[0];	//we use the memory area [0..63], first 64 bytes
 
 
@@ -376,6 +377,7 @@ Q* create_queue()
 	
 	Q_bonds_check();
 	Q_size_adjust();	//check if q count > 24, if so adjust queue max size to less
+	++current_queue_count;
 	
 	q->start_offset = Q::get_start_offset(q);
 	q->length = 0;
@@ -388,6 +390,8 @@ void destroy_queue(Q* q)
 {
 	//	printf("destroying Q [0x%p] with id: %i \n", q, *q);
 	Q::destroy(q);
+	
+	--current_queue_count;
 }
 
 
