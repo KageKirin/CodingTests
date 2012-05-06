@@ -220,6 +220,8 @@ void Q::destroy_queued_bytes()
 void Q::enqueue_byte(byteType b)
 {
 	//	bound_check();
+	assert_OutOfMemory(queued_byte::memory_available());
+	
 	
 	queued_byte* qb = queued_bytes_begin() + length;
 	qb->value = b;
