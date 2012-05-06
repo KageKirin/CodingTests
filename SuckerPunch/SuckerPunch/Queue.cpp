@@ -63,6 +63,8 @@ public:
 	bool length_is_valid();
 	bool offset_is_valid();
 	
+	uShort get_queued_bytes_data_size();
+	
 protected:
 	void destroy_queued_bytes();
 	void move_queued_bytes(queued_byte*const targetBuffer);
@@ -249,6 +251,11 @@ bool Q::length_is_valid()
 bool Q::offset_is_valid()
 {
 	return start_offset != BAD_QUEUE;
+}
+
+uShort Q::get_queued_bytes_data_size()
+{
+	return uShort(length * sizeof(queued_byte));
 }
 
 
