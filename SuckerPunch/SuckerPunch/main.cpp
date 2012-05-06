@@ -80,7 +80,7 @@ int main(int argc, const char * argv[])
 		destroy_queue(stq[i+0]);	//will run out of queues at 62 if this line is commented out
 	}
 	*/
-	/*
+
 	printf("Queue filling stress test!\n");
 	Q* fillQ[15];
 	for(int i = 0; i < 15; ++i)
@@ -92,7 +92,7 @@ int main(int argc, const char * argv[])
 	{
 		for(int i = 0; i < 15; ++i)
 		{
-			for(int b = 0; b < 5; ++b)
+			for(int b = 0; b < 10; ++b)
 			{
 				enqueue_byte(fillQ[i], (unsigned char)((a*i + b)%256));
 			}
@@ -108,7 +108,7 @@ int main(int argc, const char * argv[])
 		printf("\n");
 		destroy_queue(fillQ[i]);
 	}
-	*/
+
     return 0;
 }
 
