@@ -74,13 +74,13 @@ protected:
 
 //min/max. not using std for it
 template<typename T>
-T min(T a, T b)
+T MIN(T a, T b)
 {
 	return a < b ? a : b;
 }
 
 template<typename T>
-T max(T a, T b)
+T MAX(T a, T b)
 {
 	return a > b ? a : b;
 }
@@ -233,8 +233,8 @@ byteType Q::dequeue_byte()
 	
 	shift_left_queued_bytes();
 	--length;
-	
 	--queued_byte::current_count;
+
 	return b;
 }
 
@@ -266,7 +266,7 @@ void Q::move_queued_bytes(queued_byte*const targetBuffer)
 	
 	for(int i = 0; i < length; i += tempBufferSize)
 	{
-		unsigned int copySize = min(tempBufferSize, (unsigned int)(length - i));
+		unsigned int copySize = MIN(tempBufferSize, (unsigned int)(length - i));
 		queued_byte* origin = queued_bytes_begin() + i;
 		
 		memcpy(buffer, origin, copySize);
