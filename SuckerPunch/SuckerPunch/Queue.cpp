@@ -69,6 +69,8 @@ protected:
 	void destroy_queued_bytes();
 	void move_queued_bytes(queued_byte*const targetBuffer);
 	void shift_left_queued_bytes();
+	
+	void bound_check_and_memory_rearrange();
 };
 
 
@@ -219,9 +221,9 @@ void Q::destroy_queued_bytes()
 
 void Q::enqueue_byte(byteType b)
 {
-	//	bound_check();
 	assert_OutOfMemory(queued_byte::memory_available());
 	
+	bound_check_and_memory_rearrange();
 	
 	queued_byte* qb = queued_bytes_begin() + length;
 	qb->value = b;
@@ -293,20 +295,145 @@ void Q::shift_left_queued_bytes()
 	}
 }
 
-//
 
 
-static void Q_bonds_check()
+
+// magic happens in here
+
+uShort memory_used_or_reserved()
 {
+	uShort sum = 0;
+	for(Q* q = Q::begin(); q != Q::end(); ++q)
+	{
+		sum += MAX(q->length, current_queue_max_length);
+	}
+	return sum;
 }
 
-
-static void Q_size_adjust()
+uShort memory_used()
 {
+	uShort sum = 0;
+	for(Q* q = Q::begin(); q != Q::end(); ++q)
+	{
+		sum += q->length;
+	}
+	return sum;
 }
 
+void Q::bound_check_and_memory_rearrange()
+{
+	assert_OutOfMemory(queued_byte::current_count + 1 < max_queued_byte_count);
+	assert_IllegalOp(queued_byte::current_count == memory_used());	//something went very wrong if this one triggers
+	
+	uShort cur_ur_memory_length = memory_used_or_reserved();
+	uShort new_ur_memory_length = cur_ur_memory_length + 1;
+	uShort cur_res_memory_length = current_queue_count * current_queue_max_length;
+	uShort opt_res_memory_length = max_queued_byte_count / current_queue_count;
+	
 
+	bool new_length_below_current_queue_max_length =
+		length + 1 < current_queue_max_length;
+	
+	bool new_ur_memory_below_max_queued_byte_count =
+		new_ur_memory_length < max_queued_byte_count;
+	
 
+	if(	new_length_below_current_queue_max_length
+	&&	new_ur_memory_below_max_queued_byte_count )
+	{
+		return;	//nothing to do
+	}
+	
+	
+	if( !new_ur_memory_below_max_queued_byte_count )
+	{
+		if(opt_res_memory_length/ sizeof(queued_byte) < current_queue_max_length)
+		{
+			// decrease current_queue_max_length
+			// move queues accordingly
+			
+			byteType tempCopy[4096];	//do all the work into a copy to be on the safe side
+			memset(tempCopy, BAD_VALUE, 4096);
+			
+			//copy data to new arrangement (in tempBuffer to avoid overwriting)
+			uShort cumulOffsets = 0;
+			uShort newOffsets[64] = {0};
+			uShort* current_Q_new_offset = &newOffsets[0];
+			for(Q* q = Q::begin(); q != Q::end(); ++q)
+			{
+				*current_Q_new_offset = cumulOffsets;
+				memcpy(&tempCopy[*current_Q_new_offset], q->queued_bytes_begin(), q->get_queued_bytes_data_size());
+
+				++current_Q_new_offset;
+				cumulOffsets += MAX(opt_res_memory_length, q->get_queued_bytes_data_size());
+				assert_IllegalOp(cumulOffsets < max_queued_byte_count);
+			}
+			
+			//copy newly arranged data back
+			current_Q_new_offset = &newOffsets[0];
+			for(Q* q = Q::begin(); q != Q::end(); ++q)
+			{
+				q->start_offset = *current_Q_new_offset;
+				memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], 
+					   MAX(opt_res_memory_length, q->get_queued_bytes_data_size()));
+			}
+			current_queue_max_length = opt_res_memory_length / sizeof(queued_byte);
+			
+			
+		}
+		else if(opt_res_memory_length/ sizeof(queued_byte) > current_queue_max_length)
+		{
+			current_queue_max_length = opt_res_memory_length / sizeof(queued_byte);		
+		}
+		else
+		{
+		}
+		//	change current_queue_max_length (smaller or better fitting)
+		//	shift LEFT all the queues to new current_queue_max_length
+	}
+	
+	if( !new_length_below_current_queue_max_length )
+	{
+		byteType tempCopy[4096];	//do all the work into a copy to be on the safe side
+		memset(tempCopy, BAD_VALUE, 4096);
+		
+		if(opt_res_memory_length/ sizeof(queued_byte) > current_queue_max_length)
+		{
+			current_queue_max_length = opt_res_memory_length/ sizeof(queued_byte);		
+		}
+		
+		//copy data to new arrangement (in tempBuffer to avoid overwriting)
+		uShort cumulOffsets = 0;
+		uShort newOffsets[64] = {0};
+		uShort* current_Q_new_offset = &newOffsets[0];
+		for(Q* q = Q::begin(); q != Q::end(); ++q)
+		{
+			*current_Q_new_offset = cumulOffsets;
+			memcpy(&tempCopy[*current_Q_new_offset], q->queued_bytes_begin(), q->get_queued_bytes_data_size());
+			
+			++current_Q_new_offset;
+			cumulOffsets += MAX(uShort(current_queue_max_length * sizeof(queued_byte)), q->get_queued_bytes_data_size());
+			assert_IllegalOp(cumulOffsets < max_queued_byte_count);
+		}
+		
+		//copy newly arranged data back
+		current_Q_new_offset = &newOffsets[0];
+		for(Q* q = Q::begin(); q != Q::end(); ++q)
+		{
+			q->start_offset = *current_Q_new_offset;
+			memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], 
+				   MAX(uShort(current_queue_max_length * sizeof(queued_byte)), q->get_queued_bytes_data_size()));
+		}
+
+		
+		
+	//	change current_queue_max_length (greater / more optimized)
+	//	shift RIGHT the queues AFTER this one, beginning with the last (or else, that will overwrite data)
+	}
+	
+
+	
+}
 
 
 static void queued_byte_swap(queued_byte* a, queued_byte* b)
@@ -377,8 +504,6 @@ Q* create_queue()
 	assert_IllegalOp(q != NULL);	
 	assert_IllegalOp(q->in_valid_range());
 	
-	Q_bonds_check();
-	Q_size_adjust();	//check if q count > 24, if so adjust queue max size to less
 	++current_queue_count;
 	
 	q->start_offset = Q::get_start_offset(q);
