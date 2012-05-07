@@ -120,13 +120,13 @@ int main(int argc, const char * argv[])
 	//srand(42);
 	srand(time(NULL));
 
-	int qs_to_work_on = (rand() % 63) + 1;
+	int qs_to_work_on = (rand() % 63) + 1;	//never 0
 	
 	for(int i = 0; i < qs_to_work_on; ++i)
 	{
 		rearrQ[i] = create_queue();
 		
-		bytes_per_q[i] = rand() % (start_memory/qs_to_work_on);
+		bytes_per_q[i] = rand() % (start_memory/qs_to_work_on);	//just making sure we never run out of memory during this test
 		start_memory -= bytes_per_q[i];
 		
 		for(int b = 0; b < bytes_per_q[i]; ++b)
