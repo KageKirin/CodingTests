@@ -322,22 +322,6 @@ static uShort memory_used()
 	return sum;
 }
 
-static uShort optimal_memory_length()
-{
-	short all = max_queued_byte_count;
-	uShort validQs = 0;
-	for(Q* q = Q::begin(); q != Q::end(); ++q)
-	{
-		if(q->is_valid())
-		{
-			++validQs;			
-			all -= MAX(q->length, current_queue_max_length);
-		}
-	}
-	all /= MAX(validQs, (uShort)1);
-	return current_queue_max_length + all;
-}
-
 void Q::bound_check_and_memory_rearrange()
 {
 	assert_OutOfMemory(queued_byte::current_count + 1 < max_queued_byte_count);
