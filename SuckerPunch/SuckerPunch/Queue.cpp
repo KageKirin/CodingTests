@@ -117,7 +117,7 @@ static Q*const queue_ids = (Q*)&data[0];	//we use the memory area [0..63], first
 //array alias for queued bytes
 static const unsigned int remaining_space = data_size - max_queue_info_byteSize;
 static const unsigned int max_queued_byte_count = remaining_space / sizeof(queued_byte);
-static queued_byte*const queued_bytes = (queued_byte*)&data[max_queue_count];	//we use the remaining data for storing the data
+static queued_byte*const queued_bytes = (queued_byte*)&data[max_queue_info_byteSize];	//we use the remaining data for storing the data
 
 
 
