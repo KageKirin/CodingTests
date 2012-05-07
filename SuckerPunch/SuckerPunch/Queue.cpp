@@ -329,7 +329,7 @@ static uShort memory_used()
 void Q::bound_check_and_memory_rearrange()
 {
 	uShort used_queued_byte_count = memory_used();
-	assert_OutOfMemory(queued_byte::current_count + 1 < max_queued_byte_count);
+	assert_OutOfMemory(queued_byte::current_count + 1 <= max_queued_byte_count);
 	assert_IllegalOp(queued_byte::current_count == used_queued_byte_count);	//something went VERY wrong if this one triggers
 	
 	uShort used_or_reserved_queued_byte_count = memory_used_or_reserved();
