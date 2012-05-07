@@ -300,7 +300,7 @@ void Q::shift_left_queued_bytes()
 
 // magic happens in here
 
-uShort memory_used_or_reserved()
+static uShort memory_used_or_reserved()
 {
 	uShort sum = 0;
 	for(Q* q = Q::begin(); q != Q::end(); ++q)
@@ -310,7 +310,7 @@ uShort memory_used_or_reserved()
 	return sum;
 }
 
-uShort memory_used()
+static uShort memory_used()
 {
 	uShort sum = 0;
 	for(Q* q = Q::begin(); q != Q::end(); ++q)
