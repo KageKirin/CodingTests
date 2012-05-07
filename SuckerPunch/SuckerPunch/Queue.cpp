@@ -215,7 +215,7 @@ void Q::destroy_queued_bytes()
 		qb != queued_bytes_end();
 		++qb)
 	{
-		qb->value = BAD_VALUE;
+		qb->invalidate();
 	}
 }
 
