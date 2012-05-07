@@ -375,6 +375,7 @@ void Q::bound_check_and_memory_rearrange()
 				*current_Q_new_offset = cumulOffsets;
 				assert_IllegalOp(*current_Q_new_offset < max_queued_byte_count);
 				memcpy(&tempCopy[*current_Q_new_offset], q->queued_bytes_begin(), q->get_queued_bytes_data_size());
+				memset(q->queued_bytes_begin(), BAD_VALUE, q->get_queued_bytes_data_size());
 				
 				cumulOffsets += MAX(Q::current_max_length, q->get_queued_bytes_data_size());
 				assert_IllegalOp(cumulOffsets <= max_queued_byte_count);				
@@ -390,8 +391,7 @@ void Q::bound_check_and_memory_rearrange()
 			{
 				assert_IllegalOp(*current_Q_new_offset != BAD_QUEUE);	//should not happen
 				q->start_offset = *current_Q_new_offset;
-				memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], 
-					   MAX(uShort(Q::current_max_length * sizeof(queued_byte)), q->get_queued_bytes_data_size()));
+				memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], q->get_queued_bytes_data_size());
 			}
 			++current_Q_new_offset;
 		}
