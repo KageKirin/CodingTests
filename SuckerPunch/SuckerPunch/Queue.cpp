@@ -38,6 +38,11 @@ public:
 	uShort start_offset;	//can exceed 255
 	uShort length;			//can exceed 255
 
+	static uShort current_count;
+	static const uShort max_count;
+	
+	static uShort current_max_length;
+	static const uShort max_bytesize;
 public:
 	//API replication
 	static Q* create();
@@ -72,7 +77,11 @@ protected:
 	
 	void bound_check_and_memory_rearrange();
 };
+uShort Q::current_count = 0;
+const uShort Q::max_count = 64;
 
+uShort Q::current_max_length = 80;
+const uShort Q::max_bytesize = Q::max_count * sizeof(Q);
 
 //min/max. not using std for it
 template<typename T>
@@ -95,6 +104,18 @@ static const uShort		BAD_QUEUE = 0xFFFF;
 static const unsigned int data_size = 2048;
 static byteType data[data_size];	//queue heap
 									//data needs to be initialized once to BAD_DATA
+									
+//array alias for queues
+static Q*const queues = (Q*)&data[0];	//we use the memory area [0..63], first 64 bytes
+
+//array alias for queued bytes
+static const unsigned int remaining_space = data_size - Q::max_bytesize;
+static const unsigned int max_queued_byte_count = remaining_space / sizeof(queued_byte);
+static queued_byte*const queued_bytes = (queued_byte*)&data[Q::max_bytesize];	//we use the remaining data for storing the data
+
+
+
+
 static void initializeData()
 {
 	static bool once = false;
@@ -104,23 +125,6 @@ static void initializeData()
 	memset(data, BAD_VALUE, data_size);
 	once = true;
 }
-
-
-//array alias for queues
-static const unsigned int max_queue_count = 64;
-static const unsigned int max_queue_info_byteSize = max_queue_count * sizeof(Q);
-static uShort current_queue_count = 0;
-static uShort current_queue_max_length = 80;
-static Q*const queue_ids = (Q*)&data[0];	//we use the memory area [0..63], first 64 bytes
-
-
-//array alias for queued bytes
-static const unsigned int remaining_space = data_size - max_queue_info_byteSize;
-static const unsigned int max_queued_byte_count = remaining_space / sizeof(queued_byte);
-static queued_byte*const queued_bytes = (queued_byte*)&data[max_queue_info_byteSize];	//we use the remaining data for storing the data
-
-
-
 
 //assert functions
 static void assert_IllegalOp(bool cond)
@@ -164,12 +168,12 @@ void Q::destroy(Q *q)
 
 Q*const Q::begin()
 {
-	return &queue_ids[0];
+	return &queues[0];
 }
 
 Q*const Q::end()
 {
-	return &queue_ids[max_queue_count];
+	return &queues[Q::max_count];
 }
 
 
@@ -187,7 +191,7 @@ queued_byte*const Q::queued_bytes_end()
 bool Q::in_valid_range()
 {
 	Q* qstart = Q::begin();
-	return int(this - qstart) < max_queue_info_byteSize; 
+	return int(this - qstart) < Q::max_bytesize; 
 }
 
 bool Q::at_least_one_exists()
@@ -204,7 +208,7 @@ uShort Q::get_start_offset(Q* q)
 {
 	unsigned int qIdx = (q - Q::begin());
 	//qIdx /= sizeof(Q);
-	return qIdx * current_queue_max_length;
+	return qIdx * Q::current_max_length;
 }
 
 void Q::destroy_queued_bytes()
@@ -216,6 +220,7 @@ void Q::destroy_queued_bytes()
 		++qb)
 	{
 		qb->invalidate();
+		--queued_byte::current_count;
 	}
 }
 
@@ -235,11 +240,10 @@ byteType Q::dequeue_byte()
 {
 	queued_byte* qb = queued_bytes_begin();
 	byteType b = qb->value;
-	
+		
 	shift_left_queued_bytes();
-	--length;
+	--length;	
 	--queued_byte::current_count;
-
 	return b;
 }
 
@@ -306,7 +310,7 @@ static uShort memory_used_or_reserved()
 	for(Q* q = Q::begin(); q != Q::end(); ++q)
 	{
 		if(q->is_valid())
-			sum += MAX(q->length, current_queue_max_length);
+			sum += MAX(q->length, Q::current_max_length);
 	}
 	return sum;
 }
@@ -324,17 +328,23 @@ static uShort memory_used()
 
 void Q::bound_check_and_memory_rearrange()
 {
+	uShort used_queued_byte_count = memory_used();
 	assert_OutOfMemory(queued_byte::current_count + 1 < max_queued_byte_count);
-	assert_IllegalOp(queued_byte::current_count == memory_used());	//something went very wrong if this one triggers
+	assert_IllegalOp(queued_byte::current_count == used_queued_byte_count);	//something went VERY wrong if this one triggers
 	
-	uShort cur_ur_memory_length = memory_used_or_reserved();
-	uShort new_use_memory_length = memory_used() + 1;
+	uShort used_or_reserved_queued_byte_count = memory_used_or_reserved();
+	uShort new_used_queued_byte_count = used_queued_byte_count + 1;
+	uShort possible_queue_count = max_queued_byte_count / Q::current_max_length;
 	
-	bool new_length_below_current_queue_max_length = length + 1 <= current_queue_max_length;	
-	bool new_ur_memory_below_max_queued_byte_count = new_use_memory_length <= max_queued_byte_count;
+	static uShort last_Q_count = Q::current_count;
+	bool Q_count_differs = last_Q_count != Q::current_count;
+	last_Q_count = Q::current_count;
 	
-	if(	new_length_below_current_queue_max_length
-	&&	new_ur_memory_below_max_queued_byte_count )
+	if(	(length + 1 <= Q::current_max_length)
+	&&	(new_used_queued_byte_count <= max_queued_byte_count)
+	&&	!(	Q_count_differs
+		&&	Q::current_count > possible_queue_count)		
+	)	
 	{
 		return;	//nothing to do
 	}
@@ -343,21 +353,20 @@ void Q::bound_check_and_memory_rearrange()
 	// be it right to make place for longer Q
 	// or left for shorter/more optimal Qs
 	{
-		uShort cur_res_memory_length = current_queue_count * current_queue_max_length;
-		uShort opt_res_memory_length = current_queue_max_length + ((max_queued_byte_count - (cur_ur_memory_length+1)) / current_queue_count);
-		assert_IllegalOp(opt_res_memory_length * current_queue_count < max_queued_byte_count);
+		uShort current_reserved_queued_byte_count = Q::current_count * Q::current_max_length;
+		uShort optimal_queue_max_length = Q::current_max_length + short(short(max_queued_byte_count - (used_or_reserved_queued_byte_count+1)) / Q::current_count);
 	
-		byteType tempCopy[4096];	//do all the work into a copy to be on the safe side, allocating more data than needed to avoid being out of memory
+		//changing Q arrangement by changing the max length (by it bigger or smaller)
+		Q::current_max_length = optimal_queue_max_length;
+	
+		//we copy the contents of the Qs into a temp buffer with the new alignment to avoid overwriting data.
+		//allocating more data than needed to avoid being out of memory (should not happen though)
+		byteType tempCopy[4096];
 		memset(tempCopy, BAD_VALUE, 4096);
-		
-		if(opt_res_memory_length > current_queue_max_length)
-		{
-			current_queue_max_length = opt_res_memory_length;		
-		}
-		
+
 		//copy data to new arrangement (in tempBuffer to avoid overwriting)
 		uShort cumulOffsets = 0;
-		uShort newOffsets[64] = {0};
+		uShort newOffsets[64] = {BAD_QUEUE};
 		uShort* current_Q_new_offset = &newOffsets[0];
 		for(Q* q = Q::begin(); q != Q::end(); ++q)
 		{
@@ -367,10 +376,10 @@ void Q::bound_check_and_memory_rearrange()
 				assert_IllegalOp(*current_Q_new_offset < max_queued_byte_count);
 				memcpy(&tempCopy[*current_Q_new_offset], q->queued_bytes_begin(), q->get_queued_bytes_data_size());
 				
-				++current_Q_new_offset;
-				cumulOffsets += MAX(current_queue_max_length, q->get_queued_bytes_data_size());
-				assert_IllegalOp(cumulOffsets < max_queued_byte_count);
+				cumulOffsets += MAX(Q::current_max_length, q->get_queued_bytes_data_size());
+				assert_IllegalOp(cumulOffsets <= max_queued_byte_count);				
 			}
+			++current_Q_new_offset;
 		}
 		
 		//copy newly arranged data back
@@ -379,9 +388,10 @@ void Q::bound_check_and_memory_rearrange()
 		{
 			if(q->is_valid())
 			{
+				assert_IllegalOp(*current_Q_new_offset != BAD_QUEUE);	//should not happen
 				q->start_offset = *current_Q_new_offset;
 				memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], 
-					   MAX(uShort(current_queue_max_length * sizeof(queued_byte)), q->get_queued_bytes_data_size()));
+					   MAX(uShort(Q::current_max_length * sizeof(queued_byte)), q->get_queued_bytes_data_size()));
 			}
 		}
 	}
@@ -456,7 +466,7 @@ Q* create_queue()
 	assert_IllegalOp(q != NULL);	
 	assert_IllegalOp(q->in_valid_range());
 	
-	++current_queue_count;
+	++Q::current_count;
 	
 	q->start_offset = Q::get_start_offset(q);
 	q->length = 0;
@@ -470,7 +480,7 @@ void destroy_queue(Q* q)
 	//	printf("destroying Q [0x%p] with id: %i \n", q, *q);
 	Q::destroy(q);
 	
-	--current_queue_count;
+	--Q::current_count;
 }
 
 
