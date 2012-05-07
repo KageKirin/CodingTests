@@ -102,7 +102,7 @@ int main(int argc, const char * argv[])
 	
 	for(int i = 0; i < 15; ++i)
 	{
-		for(int c = 0; c < 40; ++c)
+		for(int c = 0; c < 80; ++c)
 		{
 			printf("q(%i): %i;\t", i, dequeue_byte(fillQ[i]));
 		}
@@ -111,13 +111,13 @@ int main(int argc, const char * argv[])
 	}
 	
 	printf("Rearrangement stress test!\n");
-	Q* rearrQ[56];
-	for(int i = 0; i < 56; ++i)
+	Q* rearrQ[64];
+	for(int i = 0; i < 64; ++i)
 	{
 		rearrQ[i] = create_queue();
 	}
 	
-	for(int i = 0; i < 56; ++i)
+	for(int i = 0; i < 64; ++i)
 	{		
 		for(int b = 0; b < 10; ++b)
 		{
@@ -125,7 +125,7 @@ int main(int argc, const char * argv[])
 		}
 	}
 	
-	for(int i = 0; i < 56; ++i)
+	for(int i = 0; i < 64; ++i)
 	{
 		for(int c = 0; c < 10; ++c)
 		{
