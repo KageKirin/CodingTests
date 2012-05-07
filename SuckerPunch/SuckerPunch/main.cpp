@@ -109,6 +109,32 @@ int main(int argc, const char * argv[])
 		printf("\n");
 		destroy_queue(fillQ[i]);
 	}
+	
+	printf("Rearrangement stress test!\n");
+	Q* rearrQ[56];
+	for(int i = 0; i < 56; ++i)
+	{
+		rearrQ[i] = create_queue();
+	}
+	
+	for(int i = 0; i < 56; ++i)
+	{		
+		for(int b = 0; b < 10; ++b)
+		{
+			enqueue_byte(rearrQ[i], (unsigned char)((i*32 + b)%255));
+		}
+	}
+	
+	for(int i = 0; i < 56; ++i)
+	{
+		for(int c = 0; c < 10; ++c)
+		{
+			printf("q(%i): %i;\t", i, dequeue_byte(rearrQ[i]));
+		}
+		printf("\n");
+		destroy_queue(rearrQ[i]);
+	}
+	
 
     return 0;
 }
