@@ -115,7 +115,7 @@ int main(int argc, const char * argv[])
 	printf("Rearrangement stress test!\n");
 	Q* rearrQ[64];
 	int bytes_per_q[64] = {0};
-	int start_memory = 1200;
+	int start_memory = 1792;
 	
 	//srand(42);
 	srand(time(NULL));
