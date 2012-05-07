@@ -9,6 +9,7 @@
 #include "stdafx.h"
 #include <cstdio>
 #include <cstring>
+#include <cmath>
 #include "Queue.h"
 
 
@@ -354,7 +355,10 @@ void Q::bound_check_and_memory_rearrange()
 	// or left for shorter/more optimal Qs
 	{
 		uShort current_reserved_queued_byte_count = Q::current_count * Q::current_max_length;
-		uShort optimal_queue_max_length = Q::current_max_length + short(short(max_queued_byte_count - (used_or_reserved_queued_byte_count+1)) / Q::current_count);
+		short resize_opt = short( floor( (float(max_queued_byte_count) - float(used_or_reserved_queued_byte_count+1)) / float(Q::current_count) ) );
+		uShort optimal_queue_max_length = Q::current_max_length + resize_opt;
+	
+		assert_IllegalOp(optimal_queue_max_length * Q::current_count <= max_queued_byte_count);
 	
 		//changing Q arrangement by changing the max length (by it bigger or smaller)
 		Q::current_max_length = optimal_queue_max_length;
