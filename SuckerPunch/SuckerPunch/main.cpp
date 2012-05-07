@@ -8,6 +8,8 @@
 
 #include "stdafx.h"
 #include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include "Queue.h"
 
 int main(int argc, const char * argv[])
@@ -112,22 +114,30 @@ int main(int argc, const char * argv[])
 	
 	printf("Rearrangement stress test!\n");
 	Q* rearrQ[64];
-	for(int i = 0; i < 64; ++i)
+	int bytes_per_q[64] = {0};
+	int start_memory = 1200;
+	
+	srand(42);	//time(NULL)
+
+	int qs_to_work_on = (rand() % 63) + 1;
+	
+	for(int i = 0; i < qs_to_work_on; ++i)
 	{
 		rearrQ[i] = create_queue();
-	}
-	
-	for(int i = 0; i < 64; ++i)
-	{		
-		for(int b = 0; b < 10; ++b)
+		
+		bytes_per_q[i] = rand() % (start_memory/qs_to_work_on);
+		start_memory -= bytes_per_q[i];
+		
+		for(int b = 0; b < bytes_per_q[i]; ++b)
 		{
 			enqueue_byte(rearrQ[i], (unsigned char)((i*32 + b)%255));
+			
 		}
 	}
-	
-	for(int i = 0; i < 64; ++i)
+		
+	for(int i = 0; i < qs_to_work_on; ++i)
 	{
-		for(int c = 0; c < 10; ++c)
+		for(int c = 0; c < bytes_per_q[i]; ++c)
 		{
 			printf("q(%i): %i;\t", i, dequeue_byte(rearrQ[i]));
 		}
