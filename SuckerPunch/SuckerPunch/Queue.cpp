@@ -266,7 +266,7 @@ uShort Q::get_queued_bytes_data_size()
 
 void Q::move_queued_bytes(queued_byte*const targetBuffer)
 {
-	static unsigned int tempBufferSize = 20;
+#define tempBufferSize 20u
 	queued_byte buffer[tempBufferSize];
 	
 	for(int i = 0; i < length; i += tempBufferSize)
