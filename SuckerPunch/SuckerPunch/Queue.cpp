@@ -305,7 +305,8 @@ static uShort memory_used_or_reserved()
 	uShort sum = 0;
 	for(Q* q = Q::begin(); q != Q::end(); ++q)
 	{
-		sum += MAX(q->length, current_queue_max_length);
+		if(q->is_valid())
+			sum += MAX(q->length, current_queue_max_length);
 	}
 	return sum;
 }
@@ -315,7 +316,8 @@ static uShort memory_used()
 	uShort sum = 0;
 	for(Q* q = Q::begin(); q != Q::end(); ++q)
 	{
-		sum += q->length;
+		if(q->is_valid())
+			sum += q->length;
 	}
 	return sum;
 }
@@ -361,21 +363,27 @@ void Q::bound_check_and_memory_rearrange()
 			uShort* current_Q_new_offset = &newOffsets[0];
 			for(Q* q = Q::begin(); q != Q::end(); ++q)
 			{
-				*current_Q_new_offset = cumulOffsets;
-				memcpy(&tempCopy[*current_Q_new_offset], q->queued_bytes_begin(), q->get_queued_bytes_data_size());
+				if(q->is_valid())
+				{
+					*current_Q_new_offset = cumulOffsets;
+					memcpy(&tempCopy[*current_Q_new_offset], q->queued_bytes_begin(), q->get_queued_bytes_data_size());
 
-				++current_Q_new_offset;
-				cumulOffsets += MAX(opt_res_memory_length, q->get_queued_bytes_data_size());
-				assert_IllegalOp(cumulOffsets < max_queued_byte_count);
+					++current_Q_new_offset;
+					cumulOffsets += MAX(opt_res_memory_length, q->get_queued_bytes_data_size());
+					assert_IllegalOp(cumulOffsets < max_queued_byte_count);
+				}
 			}
 			
 			//copy newly arranged data back
 			current_Q_new_offset = &newOffsets[0];
 			for(Q* q = Q::begin(); q != Q::end(); ++q)
 			{
-				q->start_offset = *current_Q_new_offset;
-				memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], 
+				if(q->is_valid())
+				{
+					q->start_offset = *current_Q_new_offset;
+					memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], 
 					   MAX(opt_res_memory_length, q->get_queued_bytes_data_size()));
+				}
 			}
 			current_queue_max_length = opt_res_memory_length / sizeof(queued_byte);
 			
@@ -408,21 +416,28 @@ void Q::bound_check_and_memory_rearrange()
 		uShort* current_Q_new_offset = &newOffsets[0];
 		for(Q* q = Q::begin(); q != Q::end(); ++q)
 		{
-			*current_Q_new_offset = cumulOffsets;
-			memcpy(&tempCopy[*current_Q_new_offset], q->queued_bytes_begin(), q->get_queued_bytes_data_size());
-			
-			++current_Q_new_offset;
-			cumulOffsets += MAX(uShort(current_queue_max_length * sizeof(queued_byte)), q->get_queued_bytes_data_size());
-			assert_IllegalOp(cumulOffsets < max_queued_byte_count);
+			if(q->is_valid())
+			{
+				*current_Q_new_offset = cumulOffsets;
+				assert_IllegalOp(*current_Q_new_offset < max_queued_byte_count);
+				memcpy(&tempCopy[*current_Q_new_offset], q->queued_bytes_begin(), q->get_queued_bytes_data_size());
+				
+				++current_Q_new_offset;
+				cumulOffsets += MAX(current_queue_max_length, q->get_queued_bytes_data_size());
+				assert_IllegalOp(cumulOffsets < max_queued_byte_count);
+			}
 		}
 		
 		//copy newly arranged data back
 		current_Q_new_offset = &newOffsets[0];
 		for(Q* q = Q::begin(); q != Q::end(); ++q)
 		{
-			q->start_offset = *current_Q_new_offset;
-			memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], 
-				   MAX(uShort(current_queue_max_length * sizeof(queued_byte)), q->get_queued_bytes_data_size()));
+			if(q->is_valid())
+			{
+				q->start_offset = *current_Q_new_offset;
+				memcpy(q->queued_bytes_begin(), &tempCopy[*current_Q_new_offset], 
+					   MAX(uShort(current_queue_max_length * sizeof(queued_byte)), q->get_queued_bytes_data_size()));
+			}
 		}
 
 		
