@@ -94,10 +94,11 @@ int main(int argc, const char * argv[])
 		{
 			for(int b = 0; b < 10; ++b)
 			{
-				enqueue_byte(fillQ[i], (unsigned char)((a*i + b)%256));
+				enqueue_byte(fillQ[i], (unsigned char)((a*i + b)%255));
 			}
 		}
 	}
+	enqueue_byte(fillQ[0], 0xAA);
 	
 	for(int i = 0; i < 15; ++i)
 	{
