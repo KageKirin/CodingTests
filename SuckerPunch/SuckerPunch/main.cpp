@@ -117,7 +117,8 @@ int main(int argc, const char * argv[])
 	int bytes_per_q[64] = {0};
 	int start_memory = 1200;
 	
-	srand(42);	//time(NULL)
+	//srand(42);
+	srand(time(NULL));
 
 	int qs_to_work_on = (rand() % 63) + 1;
 	
