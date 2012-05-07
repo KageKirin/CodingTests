@@ -349,7 +349,7 @@ void Q::bound_check_and_memory_rearrange()
 	
 	if( !new_ur_memory_below_max_queued_byte_count )
 	{
-		if(opt_res_memory_length/ sizeof(queued_byte) < current_queue_max_length)
+		if(opt_res_memory_length < current_queue_max_length)
 		{
 			// decrease current_queue_max_length
 			// move queues accordingly
@@ -385,13 +385,13 @@ void Q::bound_check_and_memory_rearrange()
 					   MAX(opt_res_memory_length, q->get_queued_bytes_data_size()));
 				}
 			}
-			current_queue_max_length = opt_res_memory_length / sizeof(queued_byte);
+			current_queue_max_length = opt_res_memory_length;
 			
 			
 		}
-		else if(opt_res_memory_length/ sizeof(queued_byte) > current_queue_max_length)
+		else if(opt_res_memory_length > current_queue_max_length)
 		{
-			current_queue_max_length = opt_res_memory_length / sizeof(queued_byte);		
+			current_queue_max_length = opt_res_memory_length;		
 		}
 		else
 		{
@@ -405,9 +405,9 @@ void Q::bound_check_and_memory_rearrange()
 		byteType tempCopy[4096];	//do all the work into a copy to be on the safe side
 		memset(tempCopy, BAD_VALUE, 4096);
 		
-		if(opt_res_memory_length/ sizeof(queued_byte) > current_queue_max_length)
+		if(opt_res_memory_length > current_queue_max_length)
 		{
-			current_queue_max_length = opt_res_memory_length/ sizeof(queued_byte);		
+			current_queue_max_length = opt_res_memory_length;		
 		}
 		
 		//copy data to new arrangement (in tempBuffer to avoid overwriting)
