@@ -344,24 +344,22 @@ void Q::bound_check_and_memory_rearrange()
 	assert_IllegalOp(queued_byte::current_count == memory_used());	//something went very wrong if this one triggers
 	
 	uShort cur_ur_memory_length = memory_used_or_reserved();
-	uShort new_ur_memory_length = cur_ur_memory_length + 1;
-	uShort cur_res_memory_length = current_queue_count * current_queue_max_length;
-	uShort opt_res_memory_length = max_queued_byte_count / current_queue_count;
+	uShort new_use_memory_length = memory_used() + 1;
 	
-
-	bool new_length_below_current_queue_max_length =
-		length + 1 < current_queue_max_length;
+	bool new_length_below_current_queue_max_length = length + 1 <= current_queue_max_length;	
+	bool new_ur_memory_below_max_queued_byte_count = new_use_memory_length <= max_queued_byte_count;
 	
-	bool new_ur_memory_below_max_queued_byte_count =
-		new_ur_memory_length < max_queued_byte_count;
-	
-
 	if(	new_length_below_current_queue_max_length
 	&&	new_ur_memory_below_max_queued_byte_count )
 	{
 		return;	//nothing to do
 	}
 	
+	
+	
+	uShort cur_res_memory_length = current_queue_count * current_queue_max_length;
+	uShort opt_res_memory_length = current_queue_max_length + ((max_queued_byte_count - (cur_ur_memory_length+1)) / current_queue_count);
+	assert_IllegalOp(opt_res_memory_length * current_queue_count < max_queued_byte_count);
 	
 	if( !new_ur_memory_below_max_queued_byte_count )
 	{
