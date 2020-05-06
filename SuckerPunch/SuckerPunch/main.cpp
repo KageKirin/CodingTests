@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include "Queue.h"
+#include "Queue.cpp"
 
 int main(int argc, const char * argv[])
 {
