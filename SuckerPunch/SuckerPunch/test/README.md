@@ -14,13 +14,13 @@ for the SuckerPunchCoding.
 
 The following test cases will be covered
 1. Queue/Dequeue
-    a) Normal values like: 1, 2, 3
-    b) Bigger values like: 20, 40, 60
-    c) Zero values
-    d) Negative values
+    * Normal values like: 1, 2, 3
+    * Bigger values like: 20, 40, 60
+    * Zero values
+    * Negative values
 2. OutOfMemory * Illegal operation
-    a) System should be able to handle when the memory is almost full.
-    b) System should not be able to handle when memory is full for cases like:
+    * System should be able to handle when the memory is almost full.
+    * System should not be able to handle when memory is full for cases like:
       * uses no more than 2048 bytes to implement all byte queues, and
       * must support 15 queues with an average of 80 or so bytes in each queue.
 
