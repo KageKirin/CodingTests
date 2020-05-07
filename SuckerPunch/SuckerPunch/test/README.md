@@ -4,6 +4,13 @@ SuckerPunchCodingTest
 # Test Plan
 The purpose of this readme is to explain some test scenarios and strategy
 for the SuckerPunchCoding.
+1. Functional Requirements
+a) System should be able to create Queue | R1
+b) System should be able to destroy Queue | R2
+c) System should be able to enque | R3
+d) System should be able to dequeue | R4
+e) System should be able to support until 2047 bytes in queues | R5
+f) System should support 15 queues with an average of 80 or so bytes in each queue | R6
 
 The following test cases will be covered
 1. Queue/Dequeue
@@ -12,7 +19,7 @@ The following test cases will be covered
     c) Zero values
     d) Negative values
 2. OutOfMemory * Illegal operation
-    a) System should be able to handle when the memory is almost full
+    a) System should be able to handle when the memory is almost full.
     b) System should not be able to handle when memory is full for cases like:
       * uses no more than 2048 bytes to implement all byte queues, and
       * must support 15 queues with an average of 80 or so bytes in each queue.
@@ -27,8 +34,7 @@ Reasons:
 * Easy to handle Death Test.
 
 # Configuration
-* Install Google test
-If having Debian base GNU/Linux
+* Install Google test (GNU/Linux - Debian based)
 1. Install gtest development package
 ```
 $ sudo apt-get install libgtest-dev
@@ -43,10 +49,10 @@ $ cd /usr/src/gtest
 $ sudo cmake CMakeLists.txt
 $ sudo make
 # copy or symlink "libgtest.a" and "libgtest_main.a: to your /usr/lib folder
-sudo cp *.a /usr/lib
+$ sudo cp *.a /usr/lib
 ```
 # Run the tests
-* Go to `test` directory and type the following commands
+* Being in `test` directory and type the following commands
 ```
 $ cmake CMakeLists.txt
 $ make
