@@ -5,12 +5,12 @@ SuckerPunchCodingTest
 The purpose of this readme is to explain some test scenarios and strategy
 for the SuckerPunchCoding.
 1. Functional Requirements
-a) System should be able to create Queue | R1
-b) System should be able to destroy Queue | R2
-c) System should be able to enque | R3
-d) System should be able to dequeue | R4
-e) System should be able to support until 2047 bytes in queues | R5
-f) System should support 15 queues with an average of 80 or so bytes in each queue | R6
+*  System should be able to create Queue | R1
+*  System should be able to destroy Queue | R2
+*  System should be able to enque | R3
+*  System should be able to dequeue | R4
+*  System should be able to support until 2047 bytes in queues | R5
+*  System should support 15 queues with an average of 80 or so bytes in each queue | R6
 
 The following test cases will be covered
 1. Queue/Dequeue
