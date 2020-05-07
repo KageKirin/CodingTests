@@ -13,7 +13,6 @@
 
 /* Define constants for tests */
 #define FILL_STRESS 15
-//Q* qtest = create_queue();
 
 class SuckerPunchTest : public ::testing::Test {
     protected:
@@ -32,8 +31,8 @@ class SuckerPunchTest : public ::testing::Test {
 TEST_F(SuckerPunchTest, QueueDequeue) {
     enqueue_byte(qtest, 0);
     enqueue_byte(qtest, 1);
-	enqueue_byte(qtest, 2);
-	enqueue_byte(qtest, 3);
+    enqueue_byte(qtest, 2);
+    enqueue_byte(qtest, 3);
     EXPECT_EQ(dequeue_byte(qtest), 0);
     EXPECT_EQ(dequeue_byte(qtest), 1);
     EXPECT_EQ(dequeue_byte(qtest), 2);
