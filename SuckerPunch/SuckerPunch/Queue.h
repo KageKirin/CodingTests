@@ -19,5 +19,7 @@ unsigned char dequeue_byte(Q* q);			//Pops the next byte off the FIFO queue.
 void on_out_of_memory();
 void on_illegal_operation();
 
+void clean();
+
 
 #endif
