@@ -49,7 +49,7 @@ $ cd /usr/src/gtest
 $ sudo cmake CMakeLists.txt
 $ sudo make
 # copy or symlink "libgtest.a" and "libgtest_main.a: to your /usr/lib folder
-$ sudo cp *.a /usr/lib
+$ sudo cp lib/*.a /usr/lib
 ```
 # Run the tests
 * Being in `test` directory and type the following commands
