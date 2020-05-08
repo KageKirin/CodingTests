@@ -10,7 +10,10 @@
 #include <ctime>
 #include <gtest/gtest.h>
 #include "../Queue.cpp"
+#include "../Queue.h"
 #include "../stdafx.h"
+//#include gmock/gmock.h
+
 
 /* Define constants for tests */
 #define FILL_STRESS 15
@@ -19,12 +22,20 @@
 #define STRESS_QUEUE 65
 #define STRESS_FAIL 62
 
+
 /* Needed vars */
 int i, a, b, c;
 
 class SuckerPunchTest : public ::testing::Test {
     protected:
     Q* qtest;
+	/*
+	MOCK_METHOD(void, destroy_queue, (), (override));
+	MOCK_METHOD(Q*, create_queue, (), (override));
+	MOCK_METHOD(void, enqueue_byte, (Q* q, unsiged char b), (override));
+	MOCK_METHOD(unsiged char, dequeue_byte, (Q* q), (override));
+	*/
+
 
   void SetUp() override {
       qtest = create_queue();
@@ -34,7 +45,6 @@ class SuckerPunchTest : public ::testing::Test {
       destroy_queue(qtest);
   }
 };
-
 
 // Positive Test Scenario
 TEST_F(SuckerPunchTest, QueueDequeue) {
@@ -49,6 +59,7 @@ TEST_F(SuckerPunchTest, QueueDequeue) {
     EXPECT_EQ(dequeue_byte(qtest), 1);
     EXPECT_EQ(dequeue_byte(qtest), 2);
     EXPECT_EQ(dequeue_byte(qtest), 3);
+	EXPECT_NE(qtest, nullptr);
 }
 
 // Positive Big
@@ -86,6 +97,14 @@ TEST_F(SuckerPunchTest, Zero) {
     enqueue_byte(qtest, 0);
     EXPECT_EQ(dequeue_byte(qtest), 0);
 }
+
+/* Stress with mock
+TEST_F(SuckerPunchTest, StressMock) {
+	SuckerPunchTest mock;
+    EXPECT_CALL(mock, create_queue())
+		.Times(AtLeast(STRESS_QUEUE));
+}
+*/
 
 // Stres Testing
 TEST_F(SuckerPunchTest, OutOfMemory) {
@@ -178,7 +197,7 @@ TEST_F(SuckerPunchTest, StressPass) {
 		destroy_queue(stress_q[i]);
 	}
 
-	for(int i = 0; i < 50; i++) // had 50
+	for(int i = 0; i < 50; i++)
 	{
 		stress_q[i+0] = create_queue();
 		stress_q[i+1] = create_queue();
