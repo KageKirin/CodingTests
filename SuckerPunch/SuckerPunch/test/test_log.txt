@@ -1,0 +1,190 @@
+total 900
+drwxr-xr-x 3 circleci circleci   4096 May  8 04:13 .
+drwxr-xr-x 3 circleci circleci   4096 May  8 04:12 ..
+-rw-r--r-- 1 circleci circleci  12689 May  8 04:13 CMakeCache.txt
+drwxr-xr-x 5 circleci circleci   4096 May  8 04:13 CMakeFiles
+-rw-r--r-- 1 circleci circleci    368 May  8 04:12 CMakeLists.txt
+-rw-r--r-- 1 circleci circleci   4882 May  8 04:13 Makefile
+-rw-r--r-- 1 circleci circleci   2414 May  8 04:12 README.md
+-rw-r--r-- 1 circleci circleci   1444 May  8 04:13 cmake_install.cmake
+-rw-r--r-- 1 circleci circleci   4587 May  8 04:12 main.cpp
+-rwxr-xr-x 1 circleci circleci 860488 May  8 04:13 runTests
+[==========] Running 8 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 8 tests from SuckerPunchTest
+[ RUN      ] SuckerPunchTest.QueueDequeue
+[       OK ] SuckerPunchTest.QueueDequeue (0 ms)
+[ RUN      ] SuckerPunchTest.QueueBigger
+[       OK ] SuckerPunchTest.QueueBigger (0 ms)
+[ RUN      ] SuckerPunchTest.QueueNegative
+[       OK ] SuckerPunchTest.QueueNegative (0 ms)
+[ RUN      ] SuckerPunchTest.Zero
+[       OK ] SuckerPunchTest.Zero (0 ms)
+[ RUN      ] SuckerPunchTest.OutOfMemory
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:117: Failure
+Value of: dequeue_byte(ooMQ[i])
+  Actual: false
+Expected: true
+
+[  FAILED  ] SuckerPunchTest.OutOfMemory (5 ms)
+[ RUN      ] SuckerPunchTest.IllegalOperation
+/home/circleci/project/SuckerPunch/SuckerPunch/test/main.cpp:156: Failure
+Value of: dequeue_byte(iOp[i])
+  Actual: false
+Expected: true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[  FAILED  ] SuckerPunchTest.IllegalOperation (2 ms)
+[ RUN      ] SuckerPunchTest.StressPass
+[       OK ] SuckerPunchTest.StressPass (0 ms)
+[ RUN      ] SuckerPunchTest.StressFail
+Stress Exception caught
+[       OK ] SuckerPunchTest.StressFail (0 ms)
+[----------] 8 tests from SuckerPunchTest (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test case ran. (7 ms total)
+[  PASSED  ] 6 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] SuckerPunchTest.OutOfMemory
+[  FAILED  ] SuckerPunchTest.IllegalOperation
+
+ 2 FAILED TESTS
+
+Exited with code exit status 1

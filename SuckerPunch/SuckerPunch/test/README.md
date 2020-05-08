@@ -25,6 +25,8 @@ The following test cases will be covered
       * must support 15 queues with an average of 80 or so bytes in each queue.
 3. Test Code Coverage
     * Implemented with gcov
+4. Continuos Integration (CircleCI)
+    * In this way, we make sure that any change into the code is being tested.
 
 # Test Framework
 1. Selected Google Test Framework
@@ -35,8 +37,17 @@ Reasons:
 * Good Documentation.
 * Easy to handle Death Test.
 
-# Configuration
+# Configuration and Environment
 * Install Google test (GNU/Linux - Debian based)
+All this configuration was performed on Ubuntu
+
+```
+Local host: 5.4.0-29-generic #33-Ubuntu SMP Wed Apr 29 14:32:27 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
+CI:
+Docker Engine Version: 18.09.6
+Kernel Version: Linux 034df3269b07 4.15.0-1052-aws #54-Ubuntu SMP Tue Oct 1 15:43:26 UTC 2019 x86_64 Linux
+```
+
 1. Install gtest development package
 ```
 $ sudo apt-get install libgtest-dev
