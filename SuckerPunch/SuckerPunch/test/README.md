@@ -59,3 +59,7 @@ $ make
 $ ./runTests
 ```
 
+# Configure CI
+1. CircleCI
+
+```
