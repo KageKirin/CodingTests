@@ -18,11 +18,13 @@ The following test cases will be covered
     * Bigger values like: 20, 40, 60
     * Zero values
     * Negative values
-2. OutOfMemory * Illegal operation
+2. OutOfMemory * Illegal operation (Stress Testing)
     * System should be able to handle when the memory is almost full.
     * System should not be able to handle when memory is full for cases like:
       * uses no more than 2048 bytes to implement all byte queues, and
       * must support 15 queues with an average of 80 or so bytes in each queue.
+3. Test Code Coverage
+    * Implemented with gcov
 
 # Test Framework
 1. Selected Google Test Framework
@@ -51,11 +53,26 @@ $ sudo make
 # copy or symlink "libgtest.a" and "libgtest_main.a: to your /usr/lib folder
 $ sudo cp lib/*.a /usr/lib
 ```
+4. Install gcov
+`sudo apt-get install -y lcov`
+
+
 # Run the tests
 * Being in `test` directory and type the following commands
 ```
 $ cmake CMakeLists.txt
 $ make
 $ ./runTests
-Test report, just add the following flag
+XML Test report, just add the following flag
 $ ./runTests --gtest_output=xml
+```
+
+# Test Code Coverage
+* Being in `test` directory
+```
+$ gcovr -r . # To generate test summary
+$ gcovr -r . --branches # To generate tabular output with the number of branches
+$ gcovr -r . --xml-pretty # XML Report (Useful on CI)
+$ gcovr -r . --html --html-details -o test-report-detailed.html # HTML Report
+
+```

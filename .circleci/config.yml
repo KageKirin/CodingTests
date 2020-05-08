@@ -8,8 +8,10 @@ jobs:
       - run:
           name: Install packages
           command: |
+            sudo apt-get install -y lcov
             sudo apt-get install libgtest-dev -y
             sudo apt-get install cmake -y
+
       - run:
           name: Configure cmake
           command: |
@@ -35,3 +37,8 @@ jobs:
             ls -la SuckerPunch/SuckerPunch/test/
             sudo chmod +x SuckerPunch/SuckerPunch/test/runTests
             ./SuckerPunch/SuckerPunch/test/runTests --gtest_output=xml
+      - run:
+          name: Test Report & Test Coverage
+          command: |
+            gcovr -r .
+            gcovr -r . --html --html-details -o test-report-detailed.html
