@@ -15,6 +15,7 @@ jobs:
           command: |
             sudo cmake /usr/src/gtest/CMakeLists.txt
             sudo make /usr/src/gtest
+            ls /usr/src/gtest/lib/
             sudo cp /usr/src/gtest/lib/libgtest.a /usr/lib
             sudo cp /usr/src/gtest/lib/libgtest.a /usr/lib
       - run:
