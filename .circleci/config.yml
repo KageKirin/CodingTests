@@ -33,4 +33,5 @@ jobs:
           name: Test
           command: |
             ls -la SuckerPunch/SuckerPunch/test/
-            /usr/bin/id SuckerPunch/SuckerPunch/test/runTests
+            sudo chmod +x SuckerPunch/SuckerPunch/test/runTests
+            ./SuckerPunch/SuckerPunch/test/runTests
