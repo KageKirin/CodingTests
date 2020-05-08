@@ -6,14 +6,23 @@ jobs:
     steps:
       - checkout
       - run:
-          name: The First Step
+          name: Install packages
           command: |
-            echo 'Hello World!'
-            echo 'This is the delivery pipeline'
-            ls
-            pwd
+            sudo apt-get install libgtest-dev -y
+            sudo apt-get install cmake -y
       - run:
-          name: Code Has Arrived
+          name: Configure cmake
           command: |
-            ls -al
-            echo '^^^That should look familiar^^^'
+            sudo cmake /usr/src/gtest/CMakeLists.txt
+            sudo make /usr/src/gtest
+            sudo cp /usr/src/gtest/lib/libgtest.a /usr/lib
+            sudo cp /usr/src/gtest/lib/libgtest.a /usr/lib
+      - run:
+          name: Build
+          command: |
+            cmake SuckerPunch/SuckerPunch/test/CMakeLists.txt
+            make SuckerPunch/SuckerPunch/test/
+      - run:
+          name: Test
+          command: |
+            ./runTests
