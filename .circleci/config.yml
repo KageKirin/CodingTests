@@ -31,4 +31,4 @@ jobs:
       - run:
           name: Test
           command: |
-            /bin/bash /home/circleci/project/SuckerPunch/SuckerPunch/test
+            /bin/bash /home/circleci/project/SuckerPunch/SuckerPunch/test/runTests
