@@ -17,11 +17,12 @@ jobs:
             sudo cmake CMakeLists.txt
             sudo make
             ls -la
+            cd
       - run:
           name: Copy files configuration
           command: |
-            sudo cp /usr/src/gtest/lib/libgtest.a /usr/lib
-            sudo cp /usr/src/gtest/lib/libgtest.a /usr/lib
+            sudo cp /usr/src/gtest/libgtest.a /usr/lib
+            sudo cp /usr/src/gtest/libgtest_main.a /usr/lib
       - run:
           name: Build
           command: |
