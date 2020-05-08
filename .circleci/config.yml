@@ -33,4 +33,4 @@ jobs:
           name: Test
           command: |
             ls -la SuckerPunch/SuckerPunch/test/
-            /bin/bash SuckerPunch/SuckerPunch/test/
+            /bin/bash SuckerPunch/SuckerPunch/test/runTests
