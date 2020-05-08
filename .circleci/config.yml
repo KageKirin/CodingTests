@@ -34,4 +34,4 @@ jobs:
           command: |
             ls -la SuckerPunch/SuckerPunch/test/
             sudo chmod +x SuckerPunch/SuckerPunch/test/runTests
-            ./SuckerPunch/SuckerPunch/test/runTests
+            ./SuckerPunch/SuckerPunch/test/runTests --gtest_output=xml
