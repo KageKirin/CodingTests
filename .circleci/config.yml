@@ -18,10 +18,11 @@ jobs:
       - run:
           name: Copy files configuration
           command: |
-            ls /usr/src/gtest/
-            ls /usr/src/gtest/lib/
-            sudo cp /usr/src/gtest/lib/libgtest.a /usr/lib
-            sudo cp /usr/src/gtest/lib/libgtest.a /usr/lib
+            ls -la /usr/src/gtest/
+            cd /usr/src/gtest/
+            ls -la
+            cd
+            pwd
       - run:
           name: Build
           command: |
