@@ -48,9 +48,20 @@ Docker Engine Version: 18.09.6
 Kernel Version: Linux 034df3269b07 4.15.0-1052-aws #54-Ubuntu SMP Tue Oct 1 15:43:26 UTC 2019 x86_64 Linux
 ```
 
-1. Install gtest development package
+1. Install gtest development package and google-mock
 ```
 $ sudo apt-get install libgtest-dev
+$ sudo apt-get install -y google-mock
+or as a best practice you can do the next
+
+$ cd ~
+$ git clone https://github.com/google/googletest.git
+$ cd googletest
+$ mkdir build && cd build
+$ cmake .. -DBUILD_SHARED_LIBS=ON -DINSTALL_GTEST=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr
+$ make -j8
+$ sudo make install
+$ sudo ldconfig
 ```
 2. Install cmake
 ```
