@@ -57,9 +57,5 @@ $ sudo cp lib/*.a /usr/lib
 $ cmake CMakeLists.txt
 $ make
 $ ./runTests
-```
-
-# Configure CI
-1. CircleCI
-
-```
+Test report, just add the following flag
+$ ./runTests --gtest_output=xml
