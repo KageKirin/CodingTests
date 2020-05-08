@@ -26,9 +26,11 @@ jobs:
       - run:
           name: Build
           command: |
-            cmake SuckerPunch/SuckerPunch/test/CMakeLists.txt
-            make SuckerPunch/SuckerPunch/test/
+            cd SuckerPunch/SuckerPunch/test/
+            cmake CMakeLists.txt
+            make
       - run:
           name: Test
           command: |
             ls -la SuckerPunch/SuckerPunch/test/
+            ls -la
